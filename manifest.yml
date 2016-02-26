@@ -1,7 +1,7 @@
 applications:
-- name: pz-search-metadata-ingest
-  host: pz-search-metadata-ingest
+- name: pz-search-query
+  host: pz-search-query
   memory: 512M
   instances: 1
   timeout: 80
-  path: pz-search-metadata-ingest.jar
+  path: pz-search-query.jar

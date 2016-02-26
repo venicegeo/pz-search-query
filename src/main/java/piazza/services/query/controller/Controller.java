@@ -33,7 +33,7 @@ public class Controller {
 
 	@RequestMapping(value = API_ROOT + "/esDSL", method = RequestMethod.POST, consumes = "application/json")
 	public List<String> getMetadata(@RequestBody(required = true) String esDSL)/* throws JsonParseException, JsonMappingException, IOException */{
-		SearchResponse response = client.prepareSearch("metadata_v1").setTypes("metadata").setSource(esDSL).get();
+		SearchResponse response = client.prepareSearch("pzmetadata").setTypes("DataResource").setSource(esDSL).get();
 		SearchHit[] hits = response.getHits().getHits();
 		List<String> resultsList = new ArrayList<String>();
 //		ObjectMapper mapper = new ObjectMapper();

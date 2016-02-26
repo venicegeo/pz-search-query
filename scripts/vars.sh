@@ -1,6 +1,6 @@
 #!/bin/bash
 
-APP=pz-search-metadata-ingest
+APP=pz-search-query
 EXT=jar
 SHA=$(git rev-parse HEAD)
 SHORT=$(git rev-parse --short HEAD)
