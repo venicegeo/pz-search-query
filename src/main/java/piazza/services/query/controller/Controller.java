@@ -28,7 +28,7 @@ public class Controller {
 	@RequestMapping("/")
 	@ResponseBody
 	String home() {
-		return "Hello World!";
+		return "Hello Piazza Search Query!";
 	}
 
 	@RequestMapping(value = API_ROOT + "/esDSL", method = RequestMethod.POST, consumes = "application/json")
