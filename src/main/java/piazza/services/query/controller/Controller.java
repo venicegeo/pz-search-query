@@ -44,7 +44,7 @@ public class Controller {
 	}
 
 	@SuppressWarnings("unchecked")
-	@RequestMapping(value = API_ROOT + "/data", method = RequestMethod.GET, consumes = "application/json")
+	@RequestMapping(value = API_ROOT + "/data", method = RequestMethod.POST, consumes = "application/json")
 	public List<String> getMetadata(@RequestBody(required = true) String esDSL) {
 		SearchResponse response = client.prepareSearch("pzmetadata").setTypes("DataResource").setSource(esDSL).get();
 		SearchHit[] hits = response.getHits().getHits();
