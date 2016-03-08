@@ -40,7 +40,7 @@ public class Controller {
 	@RequestMapping("/")
 	@ResponseBody
 	String home() {
-		return "Hello World!";
+		return "Hello Piazza Search Query! Ingest endpoint at /api/v1/data";
 	}
 
 	@SuppressWarnings("unchecked")

@@ -7,7 +7,7 @@ popd > /dev/null
 mvn clean package
 
 # Path to output JAR
-jarfile=$base/../target/query-service-0.0.1-SNAPSHOT.jar
+jarfile=$base/../target/pz-search-query-0.0.1-SNAPSHOT.jar
 
 # Gather some data about the repo
 source $base/vars.sh
