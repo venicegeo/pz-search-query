@@ -40,18 +40,38 @@ public class Controller {
 	@RequestMapping("/")
 	@ResponseBody
 	String home() {
-		return "Hello Piazza Search Query! Ingest endpoint at /api/v1/data";
+		return "Hello Piazza Search Query! DSL-input endpoint at /api/v1/data";
 	}
 
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = API_ROOT + "/data", method = RequestMethod.POST, consumes = "application/json")
-	public List<String> getMetadata(@RequestBody(required = true) String esDSL) {
+	public List<String> getMetadataIds(@RequestBody(required = true) String esDSL) {
 		SearchResponse response = client.prepareSearch("pzmetadata").setTypes("DataResource").setSource(esDSL).get();
 		SearchHit[] hits = response.getHits().getHits();
 		List<String> resultsList = new ArrayList<String>();
 		for (SearchHit hit : hits) {
 			Map<String, Object> json = hit.getSource();
 			resultsList.add((String) ((HashMap<Object, Object>) json.get("dataResource")).get("dataId"));
+		}
+		return resultsList;
+	}
+
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = API_ROOT + "/datafull", method = RequestMethod.POST, consumes = "application/json")
+	public List<String> getMetadata(@RequestBody(required = true) String esDSL) {
+		SearchResponse response = client.prepareSearch("pzmetadata").setTypes("DataResource").setSource(esDSL).get();
+		SearchHit[] hits = response.getHits().getHits();
+		List<String> resultsList = new ArrayList<String>();
+		for (SearchHit hit : hits) {
+//			resultsList.add( hit.sourceAsString() );  // whole dataResource container
+			//System.out.println(hit.sourceAsString() + "     whole source");
+			// same?
+			//Map<String, Object> json = hit.getSource();
+			Map<String, Object> json = hit.sourceAsMap();
+			//System.out.println(json.get("dataResource").toString());
+			//Hmmm, dataResource sub-items are added in reverse order of expected
+			// Oh well, for now; won't matter when serialized into Java object
+			resultsList.add( json.get("dataResource").toString() );
 		}
 		return resultsList;
 	}
