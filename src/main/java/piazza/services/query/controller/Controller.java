@@ -33,10 +33,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import model.job.type.SearchQueryJob;
+import util.PiazzaLogger;
 
 @RestController
 public class Controller {
-
+	private PiazzaLogger logger;
 	private final String API_ROOT = "${api.basepath}";
 	@Autowired
 	private Client client;
@@ -82,11 +83,18 @@ public class Controller {
 
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = API_ROOT + "/dsl", method = RequestMethod.POST, consumes = "application/json")
-	public List<String> getMetadata(@RequestBody(required = true) SearchQueryJob esDSLJob) {
+	public List<String> getMetadata(@RequestBody(required = true) SearchQueryJob esDSLJob)  throws Exception {
 		
 		// get reconstituted DSL string out of job object parameter
-		ObjectMapper mapper = new ObjectMapper();
-		String reconDSLstring = mapper.writeValueAsString( esDSLJob.getData() );
+		String reconDSLstring;
+		try {
+			ObjectMapper mapper = new ObjectMapper();
+			reconDSLstring = mapper.writeValueAsString( esDSLJob.getData() );
+		} catch (Exception exception) {
+			String message = String.format("Error Reconstituting DSL from SearchQueryJob: %s", exception.getMessage());
+			logger.log(message, PiazzaLogger.ERROR);
+			throw new Exception(message);
+		}
 		
 		SearchResponse response = client.prepareSearch("pzmetadata").setTypes("DataResource").setSource(reconDSLstring).get();
 		SearchHit[] hits = response.getHits().getHits();
