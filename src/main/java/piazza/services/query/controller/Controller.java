@@ -148,6 +148,7 @@ public class Controller {
 			responsePojos.add( dr );
 			//resultsList.add( json.get("dataResource").toString() );
 		}
+		System.out.println("\n\nResponse: " + mapper.writeValueAsString(responsePojos));
 		return new DataResourceListResponse( responsePojos );
 	}
 
