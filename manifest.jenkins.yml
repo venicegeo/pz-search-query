@@ -1,0 +1,9 @@
+applications:
+- name: pz-search-query
+  host: pz-search-query
+  path: pz-search-query.jar
+  buildpack: java_buildpack_offline
+  domain: stage.geointservices.io
+  memory: 512M
+  instances: 1
+  timeout: 80
