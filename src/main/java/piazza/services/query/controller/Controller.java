@@ -129,6 +129,8 @@ public class Controller {
 		String reconDSLstring;
 		try {
 			reconDSLstring = mapper.writeValueAsString( esDSLJob.getData() );
+			System.out.println("The Re-Constituted DSL query:");
+			System.out.println( reconDSLstring );
 		} catch (Exception exception) {
 			String message = String.format("Error Reconstituting DSL from SearchQueryJob: %s", exception.getMessage());
 			logger.log(message, PiazzaLogger.ERROR);
@@ -141,7 +143,7 @@ public class Controller {
 		List<DataResource> responsePojos = new ArrayList<DataResource>();
 		for (SearchHit hit : hits) {
 			Map<String, Object> json = hit.sourceAsMap();
-			//System.out.println(json.get("dataResource").toString());
+			System.out.println(json.get("dataResource").toString());
 			DataResource dr =  mapper.readValue( json.get("dataResource").toString(), DataResource.class);
 			responsePojos.add( dr );
 			//resultsList.add( json.get("dataResource").toString() );
