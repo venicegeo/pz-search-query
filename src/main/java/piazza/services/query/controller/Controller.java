@@ -30,6 +30,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 @RestController
 public class Controller {
 
@@ -60,6 +62,31 @@ public class Controller {
 	@RequestMapping(value = API_ROOT + "/datafull", method = RequestMethod.POST, consumes = "application/json")
 	public List<String> getMetadata(@RequestBody(required = true) String esDSL) {
 		SearchResponse response = client.prepareSearch("pzmetadata").setTypes("DataResource").setSource(esDSL).get();
+		SearchHit[] hits = response.getHits().getHits();
+		List<String> resultsList = new ArrayList<String>();
+		for (SearchHit hit : hits) {
+//			resultsList.add( hit.sourceAsString() );  // whole dataResource container
+			//System.out.println(hit.sourceAsString() + "     whole source");
+			// same?
+			//Map<String, Object> json = hit.getSource();
+			Map<String, Object> json = hit.sourceAsMap();
+			//System.out.println(json.get("dataResource").toString());
+			//Hmmm, dataResource sub-items are added in reverse order of expected
+			// Oh well, for now; won't matter when serialized into Java object
+			resultsList.add( json.get("dataResource").toString() );
+		}
+		return resultsList;
+	}
+
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = API_ROOT + "/dsl", method = RequestMethod.POST, consumes = "application/json")
+	public List<String> getMetadata(@RequestBody(required = true) SearchQueryJob esDSLJob) {
+		
+		// get reconstituted DSL string out of job object parameter
+		ObjectMapper mapper = new ObjectMapper();
+		String reconDSLstring = mapper.writeValueAsString( esDSLJob.getData() );
+		
+		SearchResponse response = client.prepareSearch("pzmetadata").setTypes("DataResource").setSource(reconDSLstring).get();
 		SearchHit[] hits = response.getHits().getHits();
 		List<String> resultsList = new ArrayList<String>();
 		for (SearchHit hit : hits) {
