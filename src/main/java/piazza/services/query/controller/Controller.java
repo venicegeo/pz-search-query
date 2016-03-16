@@ -33,6 +33,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import model.job.type.SearchQueryJob;
+import model.data.DataResource;
+import model.response.DataResourceListResponse;
 import util.PiazzaLogger;
 
 @RestController
@@ -63,7 +65,7 @@ public class Controller {
 
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = API_ROOT + "/datafull", method = RequestMethod.POST, consumes = "application/json")
-	public List<String> getMetadata(@RequestBody(required = true) String esDSL) {
+	public List<String> getMetadataFull(@RequestBody(required = true) String esDSL) {
 		SearchResponse response = client.prepareSearch("pzmetadata").setTypes("DataResource").setSource(esDSL).get();
 		SearchHit[] hits = response.getHits().getHits();
 		List<String> resultsList = new ArrayList<String>();
@@ -82,8 +84,8 @@ public class Controller {
 	}
 
 	@SuppressWarnings("unchecked")
-	@RequestMapping(value = API_ROOT + "/dsl", method = RequestMethod.POST, consumes = "application/json")
-	public List<String> getMetadata(@RequestBody(required = true) SearchQueryJob esDSLJob)  throws Exception {
+	@RequestMapping(value = API_ROOT + "/dslforJSON", method = RequestMethod.POST, consumes = "application/json")
+	public List<String> getMetadataJobToJSON(@RequestBody(required = true) SearchQueryJob esDSLJob)  throws Exception {
 		
 		// get reconstituted DSL string out of job object parameter
 		String reconDSLstring;
@@ -111,6 +113,40 @@ public class Controller {
 			resultsList.add( json.get("dataResource").toString() );
 		}
 		return resultsList;
+	}
+
+	/*
+	 * endpoint ingesting SearchQueryJob containing DSL string
+	 * @return list of dataResource objects matching criteria
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = API_ROOT + "/dsl", method = RequestMethod.POST, consumes = "application/json")
+	public DataResourceListResponse getMetadataJob(@RequestBody(required = true) SearchQueryJob esDSLJob)  throws Exception {
+		
+		ObjectMapper mapper = new ObjectMapper();
+		
+		// get reconstituted DSL string out of job object parameter
+		String reconDSLstring;
+		try {
+			reconDSLstring = mapper.writeValueAsString( esDSLJob.getData() );
+		} catch (Exception exception) {
+			String message = String.format("Error Reconstituting DSL from SearchQueryJob: %s", exception.getMessage());
+			logger.log(message, PiazzaLogger.ERROR);
+			throw new Exception(message);
+		}
+		
+		SearchResponse response = client.prepareSearch("pzmetadata").setTypes("DataResource").setSource(reconDSLstring).get();
+		SearchHit[] hits = response.getHits().getHits();
+		List<String> resultsList = new ArrayList<String>();
+		List<DataResource> responsePojos = new ArrayList<DataResource>();
+		for (SearchHit hit : hits) {
+			Map<String, Object> json = hit.sourceAsMap();
+			//System.out.println(json.get("dataResource").toString());
+			DataResource dr =  mapper.readValue( json.get("dataResource").toString(), DataResource.class);
+			responsePojos.add( dr );
+			//resultsList.add( json.get("dataResource").toString() );
+		}
+		return new DataResourceListResponse( responsePojos );
 	}
 
 }
