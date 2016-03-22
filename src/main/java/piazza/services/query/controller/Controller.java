@@ -158,7 +158,7 @@ public class Controller {
 		return new DataResourceListResponse( responsePojos );
 	}
 
-	/*  ****NOT WORKING- FOR REFERENCE TBD  3/18/16
+	/* 
 	 * endpoint ingesting SearchQueryJob containing DSL string
 	 * @return list of dataResource objects matching criteria
 	 */
@@ -180,9 +180,16 @@ public class Controller {
 			throw new Exception(message);
 		}
 		
-		SearchResponse response = client.prepareSearch("pzmetadata").setTypes("DataResource").setSource(reconDSLstring).get();
-		SearchHit[] hits = response.getHits().getHits();
-		//List<String> resultsList = new ArrayList<String>();
+		SearchResponse response;
+		SearchHit[] hits;
+		try {
+			response = client.prepareSearch("pzmetadata").setTypes("DataResource").setSource(reconDSLstring).get();
+			hits = response.getHits().getHits();
+		} catch (Exception exception) {
+			String message = String.format("Error completing DSL to Elasticsearch from SearchQueryJob: %s", exception.getMessage());
+			logger.log(message, PiazzaLogger.ERROR);
+			throw new Exception(message);
+		}
 		List<DataResource> responsePojos = new ArrayList<DataResource>();
 		for (SearchHit hit : hits) {
 			/*
@@ -192,8 +199,8 @@ public class Controller {
 			responsePojos.add( dr );
 			//resultsList.add( json.get("dataResource").toString() );
 			 * */
-			Map<String, Object> json = hit.sourceAsMap();
-			System.out.println(json.get("dataResource").toString());
+			//Map<String, Object> json = hit.sourceAsMap();
+			//System.out.println(json.get("dataResource").toString());
 			DataResourceContainer drc =  mapper.readValue( hit.sourceAsString(), DataResourceContainer.class);
 			responsePojos.add( drc.dataResource );
 			//resultsList.add( json.get("dataResource").toString() );
