@@ -41,7 +41,8 @@ import util.PiazzaLogger;
 
 @RestController
 public class Controller {
-	private PiazzaLogger logger;
+	
+	private PiazzaLogger logger = new PiazzaLogger();
 	private final String API_ROOT = "${api.basepath}";
 	@Autowired
 	private Client client;
@@ -141,7 +142,7 @@ public class Controller {
 			throw new Exception(message);
 		}
 		
-		List<String> resultsList = new ArrayList<String>();
+//		List<String> resultsList = new ArrayList<String>();
 		List<DataResource> responsePojos = new ArrayList<DataResource>();
 		for (SearchHit hit : hits) {
 //			resultsList.add( hit.sourceAsString() );  // whole dataResource container
@@ -172,8 +173,8 @@ public class Controller {
 		String reconDSLstring;
 		try {
 			reconDSLstring = mapper.writeValueAsString( esDSLJob.getData() );
-			System.out.println("The Re-Constituted DSL query:");
-			System.out.println( reconDSLstring );
+			//System.out.println("The Re-Constituted DSL query:");
+			//System.out.println( reconDSLstring );
 		} catch (Exception exception) {
 			String message = String.format("Error Reconstituting DSL from SearchQueryJob: %s", exception.getMessage());
 			logger.log(message, PiazzaLogger.ERROR);
@@ -205,7 +206,8 @@ public class Controller {
 			responsePojos.add( drc.dataResource );
 			//resultsList.add( json.get("dataResource").toString() );
 		}
-		System.out.println("\n\nResponse: " + mapper.writeValueAsString(responsePojos));
+		logger.log("\n\nResponse: " + mapper.writeValueAsString(responsePojos), PiazzaLogger.INFO);
+		//System.out.println("\n\nResponse: " + mapper.writeValueAsString(responsePojos));
 		return new DataResourceListResponse( responsePojos );
 	}
 
