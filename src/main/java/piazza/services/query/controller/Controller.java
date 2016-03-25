@@ -30,6 +30,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import piazza.services.query.controller.DataResourceContainer;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import model.job.type.SearchQueryJob;
@@ -39,7 +41,8 @@ import util.PiazzaLogger;
 
 @RestController
 public class Controller {
-	private PiazzaLogger logger;
+	
+	private PiazzaLogger logger = new PiazzaLogger();
 	private final String API_ROOT = "${api.basepath}";
 	@Autowired
 	private Client client;
@@ -71,14 +74,17 @@ public class Controller {
 		List<String> resultsList = new ArrayList<String>();
 		for (SearchHit hit : hits) {
 //			resultsList.add( hit.sourceAsString() );  // whole dataResource container
-			//System.out.println(hit.sourceAsString() + "     whole source");
+			System.out.println(hit.sourceAsString() + "     whole source");
 			// same?
 			//Map<String, Object> json = hit.getSource();
 			Map<String, Object> json = hit.sourceAsMap();
-			//System.out.println(json.get("dataResource").toString());
+			System.out.println(json.get("dataResource").toString());
+			//System.out.println(json.get("dataResource"));
 			//Hmmm, dataResource sub-items are added in reverse order of expected
 			// Oh well, for now; won't matter when serialized into Java object
-			resultsList.add( json.get("dataResource").toString() );
+			//resultsList.add( json.get("dataResource").toString() );
+			System.out.println("Ready to add dataResource:");
+			resultsList.add( (String) json.get("dataResource") );
 		}
 		return resultsList;
 	}
@@ -103,11 +109,12 @@ public class Controller {
 		List<String> resultsList = new ArrayList<String>();
 		for (SearchHit hit : hits) {
 //			resultsList.add( hit.sourceAsString() );  // whole dataResource container
-			//System.out.println(hit.sourceAsString() + "     whole source");
+			System.out.println(hit.sourceAsString() + "     whole source of hit");
 			// same?
 			//Map<String, Object> json = hit.getSource();
 			Map<String, Object> json = hit.sourceAsMap();
 			//System.out.println(json.get("dataResource").toString());
+			//System.out.println(json.get("dataResource"));
 			//Hmmm, dataResource sub-items are added in reverse order of expected
 			// Oh well, for now; won't matter when serialized into Java object
 			resultsList.add( json.get("dataResource").toString() );
@@ -115,7 +122,44 @@ public class Controller {
 		return resultsList;
 	}
 
-	/*
+	/* 
+	 * endpoint ingesting SearchQueryJob containing DSL string
+	 * @return list of dataResource objects matching criteria
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = API_ROOT + "/dslfordataresources", method = RequestMethod.POST, consumes = "application/json")
+	public DataResourceListResponse getDSLtoDRs(@RequestBody(required = true) String esDSL)  throws Exception {
+		
+		// get reconstituted DSL string out of job object parameter
+		ObjectMapper mapper = new ObjectMapper();
+		SearchHit[] hits;
+		try {
+			SearchResponse response = client.prepareSearch("pzmetadata").setTypes("DataResource").setSource(esDSL).get();
+			hits = response.getHits().getHits();
+		} catch (Exception exception) {
+			String message = String.format("Error Reconstituting DSL from SearchQueryJob: %s", exception.getMessage());
+			logger.log(message, PiazzaLogger.ERROR);
+			throw new Exception(message);
+		}
+		
+//		List<String> resultsList = new ArrayList<String>();
+		List<DataResource> responsePojos = new ArrayList<DataResource>();
+		for (SearchHit hit : hits) {
+//			resultsList.add( hit.sourceAsString() );  // whole dataResource container
+			//System.out.println(hit.sourceAsString() + "     whole source of hit");
+			// same?
+			//Map<String, Object> json = hit.getSource();
+			DataResourceContainer drc =  mapper.readValue( hit.sourceAsString(), DataResourceContainer.class);
+			responsePojos.add( drc.dataResource );
+			//Hmmm, dataResource sub-items are added in reverse order of expected
+			// Oh well, for now; won't matter when serialized into Java object
+			//resultsList.add( json.get("dataResource").toString() );
+		}
+		System.out.println("\n\nResponse: " + mapper.writeValueAsString(responsePojos));
+		return new DataResourceListResponse( responsePojos );
+	}
+
+	/* 
 	 * endpoint ingesting SearchQueryJob containing DSL string
 	 * @return list of dataResource objects matching criteria
 	 */
@@ -129,26 +173,41 @@ public class Controller {
 		String reconDSLstring;
 		try {
 			reconDSLstring = mapper.writeValueAsString( esDSLJob.getData() );
-			System.out.println("The Re-Constituted DSL query:");
-			System.out.println( reconDSLstring );
+			//System.out.println("The Re-Constituted DSL query:");
+			//System.out.println( reconDSLstring );
 		} catch (Exception exception) {
 			String message = String.format("Error Reconstituting DSL from SearchQueryJob: %s", exception.getMessage());
 			logger.log(message, PiazzaLogger.ERROR);
 			throw new Exception(message);
 		}
 		
-		SearchResponse response = client.prepareSearch("pzmetadata").setTypes("DataResource").setSource(reconDSLstring).get();
-		SearchHit[] hits = response.getHits().getHits();
-		List<String> resultsList = new ArrayList<String>();
+		SearchResponse response;
+		SearchHit[] hits;
+		try {
+			response = client.prepareSearch("pzmetadata").setTypes("DataResource").setSource(reconDSLstring).get();
+			hits = response.getHits().getHits();
+		} catch (Exception exception) {
+			String message = String.format("Error completing DSL to Elasticsearch from SearchQueryJob: %s", exception.getMessage());
+			logger.log(message, PiazzaLogger.ERROR);
+			throw new Exception(message);
+		}
 		List<DataResource> responsePojos = new ArrayList<DataResource>();
 		for (SearchHit hit : hits) {
+			/*
 			Map<String, Object> json = hit.sourceAsMap();
 			System.out.println(json.get("dataResource").toString());
 			DataResource dr =  mapper.readValue( json.get("dataResource").toString(), DataResource.class);
 			responsePojos.add( dr );
 			//resultsList.add( json.get("dataResource").toString() );
+			 * */
+			//Map<String, Object> json = hit.sourceAsMap();
+			//System.out.println(json.get("dataResource").toString());
+			DataResourceContainer drc =  mapper.readValue( hit.sourceAsString(), DataResourceContainer.class);
+			responsePojos.add( drc.dataResource );
+			//resultsList.add( json.get("dataResource").toString() );
 		}
-		System.out.println("\n\nResponse: " + mapper.writeValueAsString(responsePojos));
+		logger.log("\n\nResponse: " + mapper.writeValueAsString(responsePojos), PiazzaLogger.INFO);
+		//System.out.println("\n\nResponse: " + mapper.writeValueAsString(responsePojos));
 		return new DataResourceListResponse( responsePojos );
 	}
 
