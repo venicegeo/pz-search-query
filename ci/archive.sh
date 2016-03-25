@@ -8,7 +8,7 @@ popd > /dev/null
 source $root/ci/vars.sh
 
 # Path to output JAR
-src=$root/target/$APP*.$EXT
+src=$(find $root/target/ -name $APP*.$EXT -a ! -name '*tests.jar')
 
 # Build Spring-boot JAR
 [ -f $src ] || mvn clean package -U
