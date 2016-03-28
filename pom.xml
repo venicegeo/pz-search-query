@@ -26,19 +26,18 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-elasticsearch</artifactId>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter</artifactId>
 		</dependency>
 
 		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.venice.piazza</groupId>
+			<groupId>io.piazzageo</groupId>
 			<artifactId>pz-jobcommon</artifactId>
-			<version>1.0.0.BUILD-SNAPSHOT</version>
+			<version>LATEST</version>
 		</dependency>
 
 		<dependency>
@@ -57,22 +56,9 @@
 			<artifactId>aws-java-sdk-s3</artifactId>
 			<version>1.10.43</version>
 		</dependency>
-		
-		<dependency>
-            <groupId>org.codehaus.woodstox</groupId>
-            <artifactId>woodstox-core-asl</artifactId>
-            <version>4.4.1</version>
-        </dependency>
 	</dependencies>
 
 	<build>
-		<extensions>
-			<extension>
-				<groupId>org.kuali.maven.wagons</groupId>
-				<artifactId>maven-s3-wagon</artifactId>
-				<version>1.2.1</version>
-			</extension>
-		</extensions>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
@@ -96,8 +82,8 @@
 	<repositories>
 
 		<repository>
-			<id>s3.snapshot</id>
-			<url>s3://venice-maven-private/snapshot</url>
+			<id>nexus</id>
+			<url>https://nexus.devops.geointservices.io/content/repositories/Piazza/</url>
 		</repository>
 
 		<repository>
