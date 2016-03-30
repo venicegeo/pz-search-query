@@ -23,6 +23,7 @@ import java.util.Map;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHitField;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -68,25 +69,45 @@ public class Controller {
 
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = API_ROOT + "/datafull", method = RequestMethod.POST, consumes = "application/json")
-	public List<String> getMetadataFull(@RequestBody(required = true) String esDSL) {
+	public List<String> getMetadataFull(@RequestBody(required = true) String esDSL)   throws Exception {
 		SearchResponse response = client.prepareSearch("pzmetadata").setTypes("DataResource").setSource(esDSL).get();
 		SearchHit[] hits = response.getHits().getHits();
+		ObjectMapper mapper = new ObjectMapper();
 		List<String> resultsList = new ArrayList<String>();
-		for (SearchHit hit : hits) {
-//			resultsList.add( hit.sourceAsString() );  // whole dataResource container
-			System.out.println(hit.sourceAsString() + "     whole source");
-			// same?
-			//Map<String, Object> json = hit.getSource();
-			Map<String, Object> json = hit.sourceAsMap();
-			System.out.println(json.get("dataResource").toString());
-			//System.out.println(json.get("dataResource"));
-			//Hmmm, dataResource sub-items are added in reverse order of expected
-			// Oh well, for now; won't matter when serialized into Java object
-			//resultsList.add( json.get("dataResource").toString() );
-			System.out.println("Ready to add dataResource:");
-			resultsList.add( (String) json.get("dataResource") );
+		try {
+			for (SearchHit hit : hits) {
+	//			resultsList.add( hit.sourceAsString() );  // whole dataResource container
+				System.out.println(hit.sourceAsString() + "     whole source");
+				DataResourceContainer drc =  mapper.readValue( hit.sourceAsString(), DataResourceContainer.class);
+				DataResource dr = drc.dataResource;
+				resultsList.add( mapper.writeValueAsString( dr ) );
+				//resultsList.add( dr.toString() );
+/*	
+				Map<String, Object> json = hit.sourceAsMap();
+				System.out.println(json.get("dataResource").toString());
+				DataResource dr =  mapper.readValue( json.get("dataResource").toString(), DataResource.class);
+				responsePojos.add( dr );
+*/
+				
+	//			SearchHitField drField = hit.field("data");
+	//			resultsList.add( drField.getValues().toString() );
+	//			mapper.writeValueAsString( esDSLJob.getData() );
+				// same?
+				//Map<String, Object> json = hit.getSource();
+				//Map<String, Object> json = hit.sourceAsMap();
+				//System.out.println(json.get("dataResource"));
+				//Hmmm, dataResource sub-items are added in reverse order of expected
+				// Oh well, for now; won't matter when serialized into Java object
+				//resultsList.add( json.get("dataResource").toString() );
+				//System.out.println("Ready to add dataResource:");
+				//resultsList.add( (String) json.get("dataResource") );
+			}
+			return resultsList;
+		} catch (Exception exception) {
+			String message = String.format("Error completing DSL to Elasticsearch: %s", exception.getMessage());
+			logger.log(message, PiazzaLogger.ERROR);
+			throw new Exception(message);
 		}
-		return resultsList;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -103,23 +124,23 @@ public class Controller {
 			logger.log(message, PiazzaLogger.ERROR);
 			throw new Exception(message);
 		}
-		
-		SearchResponse response = client.prepareSearch("pzmetadata").setTypes("DataResource").setSource(reconDSLstring).get();
-		SearchHit[] hits = response.getHits().getHits();
-		List<String> resultsList = new ArrayList<String>();
-		for (SearchHit hit : hits) {
-//			resultsList.add( hit.sourceAsString() );  // whole dataResource container
-			System.out.println(hit.sourceAsString() + "     whole source of hit");
-			// same?
-			//Map<String, Object> json = hit.getSource();
-			Map<String, Object> json = hit.sourceAsMap();
-			//System.out.println(json.get("dataResource").toString());
-			//System.out.println(json.get("dataResource"));
-			//Hmmm, dataResource sub-items are added in reverse order of expected
-			// Oh well, for now; won't matter when serialized into Java object
-			resultsList.add( json.get("dataResource").toString() );
+			
+		try {
+			ObjectMapper mapper = new ObjectMapper();
+			SearchResponse response = client.prepareSearch("pzmetadata").setTypes("DataResource").setSource(reconDSLstring).get();
+			SearchHit[] hits = response.getHits().getHits();
+			List<String> resultsList = new ArrayList<String>();
+			for (SearchHit hit : hits) {
+				DataResourceContainer drc =  mapper.readValue( hit.sourceAsString(), DataResourceContainer.class);
+				DataResource dr = drc.dataResource;
+				resultsList.add( mapper.writeValueAsString( dr ) );
+			}
+			return resultsList;
+		} catch (Exception exception) {
+			String message = String.format("Error completing DSL to Elasticsearch: %s", exception.getMessage());
+			logger.log(message, PiazzaLogger.ERROR);
+			throw new Exception(message);
 		}
-		return resultsList;
 	}
 
 	/* 
