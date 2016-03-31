@@ -21,9 +21,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.count.CountResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHitField;
+//import static org.elasticsearch.index.query.FilterBuilders.*;
+import org.elasticsearch.index.query.*;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -52,6 +56,26 @@ public class Controller {
 	@ResponseBody
 	String home() {
 		return "Hello Piazza Search Query! DSL-input endpoint at /api/v1/data";
+	}
+
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = API_ROOT + "/recordcount", method = RequestMethod.POST, consumes = "application/json")
+	public Long getRecordCount(@RequestBody(required = true) String esDSL) {
+		WrapperQueryBuilder qsqb = new WrapperQueryBuilder( esDSL );
+		//QueryBuilder qsqb = QueryBuilders.wrapperQuery( esDSL ); //YES! Also works
+		/*   e.g. { "match_all" : { } }
+		 or
+			{
+			"match" : {
+				"_all" : "kitten"
+			}
+}
+		 */
+		CountResponse response = client.prepareCount("pzmetadata")
+		        .setQuery( qsqb )
+		        .execute()
+		        .actionGet();
+		return response.getCount();
 	}
 
 	@SuppressWarnings("unchecked")
