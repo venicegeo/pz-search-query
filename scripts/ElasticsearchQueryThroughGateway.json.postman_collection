@@ -24,7 +24,7 @@
 			"data": [
 				{
 					"key": "body",
-					"value": "{     \"apiKey\": \"my-api-key-38n987\",     \"jobType\": {         \"type\": \"search-query\",         \"data\": { \"query\" : { \"match\" : { \"_all\" : \"FileWatcher\" } } }     } }",
+					"value": "{     \"userName\": \"my-api-key-38n987\",     \"jobType\": {         \"type\": \"search-query\",         \"data\": { \"query\" : { \"match\" : { \"_all\" : \"FileWatcher\" } } }     } }",
 					"type": "text",
 					"enabled": true
 				}
@@ -51,7 +51,7 @@
 			"data": [
 				{
 					"key": "body",
-					"value": "{     \"apiKey\": \"my-api-key-38n987\",     \"jobType\": {         \"type\": \"search-query\",         \"data\": {      \"query\" : {         \"fuzzy_like_this\" : {           \"like_text\" : \"kiten\"         }      }   }     } }",
+					"value": "{     \"userName\": \"my-api-key-38n987\",     \"jobType\": {         \"type\": \"search-query\",         \"data\": {      \"query\" : {         \"fuzzy_like_this\" : {           \"like_text\" : \"kiten\"         }      }   }     } }",
 					"type": "text",
 					"enabled": true
 				}
@@ -77,7 +77,7 @@
 			"data": [
 				{
 					"key": "body",
-					"value": "{     \"apiKey\": \"my-api-key-38n987\",     \"jobType\": {         \"type\": \"search-query\",         \"data\": {      \"query\" : {         \"fuzzy_like_this\" : {           \"like_text\" : \"kiten\"         }      }   }     } }",
+					"value": "{     \"userName\": \"my-api-key-38n987\",     \"jobType\": {         \"type\": \"search-query\",         \"data\": {      \"query\" : {         \"fuzzy_like_this\" : {           \"like_text\" : \"kiten\"         }      }   }     } }",
 					"type": "text",
 					"enabled": true
 				}
