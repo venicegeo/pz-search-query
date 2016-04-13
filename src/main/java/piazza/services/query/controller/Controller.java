@@ -24,7 +24,6 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.count.CountResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.SearchHitField;
 //import static org.elasticsearch.index.query.FilterBuilders.*;
 import org.elasticsearch.index.query.*;
 
@@ -58,7 +57,6 @@ public class Controller {
 		return "Hello Piazza Search Query! DSL-input endpoint at /api/v1/data";
 	}
 
-	@SuppressWarnings("unchecked")
 	@RequestMapping(value = API_ROOT + "/recordcount", method = RequestMethod.POST, consumes = "application/json")
 	public Long getRecordCount(@RequestBody(required = true) String esDSL) {
 		WrapperQueryBuilder qsqb = new WrapperQueryBuilder( esDSL );
@@ -91,7 +89,6 @@ public class Controller {
 		return resultsList;
 	}
 
-	@SuppressWarnings("unchecked")
 	@RequestMapping(value = API_ROOT + "/datafull", method = RequestMethod.POST, consumes = "application/json")
 	public List<String> getMetadataFull(@RequestBody(required = true) String esDSL)   throws Exception {
 		SearchResponse response = client.prepareSearch("pzmetadata").setTypes("DataResource").setSource(esDSL).get();
@@ -134,7 +131,6 @@ public class Controller {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	@RequestMapping(value = API_ROOT + "/dslforJSON", method = RequestMethod.POST, consumes = "application/json")
 	public List<String> getMetadataJobToJSON(@RequestBody(required = true) SearchQueryJob esDSLJob)  throws Exception {
 		
@@ -171,7 +167,6 @@ public class Controller {
 	 * endpoint ingesting SearchQueryJob containing DSL string
 	 * @return list of dataResource objects matching criteria
 	 */
-	@SuppressWarnings("unchecked")
 	@RequestMapping(value = API_ROOT + "/dslfordataresources", method = RequestMethod.POST, consumes = "application/json")
 	public DataResourceListResponse getDSLtoDRs(@RequestBody(required = true) String esDSL)  throws Exception {
 		
@@ -208,7 +203,6 @@ public class Controller {
 	 * endpoint ingesting SearchQueryJob containing DSL string
 	 * @return list of dataResource objects matching criteria
 	 */
-	@SuppressWarnings("unchecked")
 	@RequestMapping(value = API_ROOT + "/dsl", method = RequestMethod.POST, consumes = "application/json")
 	public DataResourceListResponse getMetadataJob(@RequestBody(required = true) SearchQueryJob esDSLJob)  throws Exception {
 		
