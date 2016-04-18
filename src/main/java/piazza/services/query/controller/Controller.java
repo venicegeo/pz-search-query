@@ -32,6 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -255,5 +256,12 @@ public class Controller {
 		//System.out.println("\n\nResponse: " + mapper.writeValueAsString(responsePojos));
 		return new DataResourceListResponse( responsePojos );
 	}
-
+	
+	@RequestMapping(value = API_ROOT + "/simple", method = RequestMethod.GET)
+	public DataResourceListResponse getMetadataByKeyword(@RequestParam(value="keyword", required=true) String keyword) throws Exception {
+		SearchQueryJob sqj = new SearchQueryJob();
+		sqj.data = (new ObjectMapper()).readValue("{\"query\":{\"match\":{\"_all\":\"" + keyword + "\"}}}", Object.class);
+	
+		return getMetadataJob(sqj);
+	}
 }
