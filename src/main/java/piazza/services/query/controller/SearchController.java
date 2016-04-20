@@ -90,7 +90,6 @@ public class SearchController {
 		ObjectMapper mapper = new ObjectMapper();
 
 		for (SearchHit hit : hits) {
-//			DataResourceContainer drc =  ((DataResourceContainer)(mapper.readValue( hit.sourceAsString(), DataResourceContainer.class)));
 			responsePojos.add( ((DataResourceContainer)(mapper.readValue( hit.sourceAsString(), DataResourceContainer.class))).dataResource );
 		}
 //			logger.log("\n\nResponse: " + mapper.writeValueAsString(responsePojos), PiazzaLogger.INFO);
