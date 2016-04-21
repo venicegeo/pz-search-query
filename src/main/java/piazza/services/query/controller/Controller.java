@@ -15,10 +15,13 @@
  **/
 package piazza.services.query.controller;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.count.CountResponse;
@@ -77,11 +80,22 @@ public class Controller {
 		        .actionGet();
 		return response.getCount();
 	}
-
+	
+	/**
+	 * Statistics from Spring Boot
+	 * 
+	 * @return json as statistics
+	 */
+	@RequestMapping(value = "/admin/stats",  method = RequestMethod.GET)
+	public void stats(HttpServletResponse response) throws IOException {
+		 response.sendRedirect("/metrics");
+	}
+	
+	
 	@SuppressWarnings("unchecked")
-	@RequestMapping(value = API_ROOT + "/data", method = RequestMethod.POST, consumes = "application/json")
+	@RequestMapping(value = API_ROOT + "/dataIds", method = RequestMethod.POST, consumes = "application/json")
 	public List<String> getMetadataIds(@RequestBody(required = true) String esDSL) {
-		SearchResponse response = client.prepareSearch("pzmetadata").setTypes("DataResource").setSource(esDSL).get();
+		SearchResponse response = client.prepareSearch("pzmetadata").setTypes("DataResourceContainer").setSource(esDSL).get();
 		SearchHit[] hits = response.getHits().getHits();
 		List<String> resultsList = new ArrayList<String>();
 		for (SearchHit hit : hits) {
@@ -94,7 +108,7 @@ public class Controller {
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = API_ROOT + "/datafull", method = RequestMethod.POST, consumes = "application/json")
 	public List<String> getMetadataFull(@RequestBody(required = true) String esDSL)   throws Exception {
-		SearchResponse response = client.prepareSearch("pzmetadata").setTypes("DataResource").setSource(esDSL).get();
+		SearchResponse response = client.prepareSearch("pzmetadata").setTypes("DataResourceContainer").setSource(esDSL).get();
 		SearchHit[] hits = response.getHits().getHits();
 		ObjectMapper mapper = new ObjectMapper();
 		List<String> resultsList = new ArrayList<String>();
@@ -151,7 +165,7 @@ public class Controller {
 			
 		try {
 			ObjectMapper mapper = new ObjectMapper();
-			SearchResponse response = client.prepareSearch("pzmetadata").setTypes("DataResource").setSource(reconDSLstring).get();
+			SearchResponse response = client.prepareSearch("pzmetadata").setTypes("DataResourceContainer").setSource(reconDSLstring).get();
 			SearchHit[] hits = response.getHits().getHits();
 			List<String> resultsList = new ArrayList<String>();
 			for (SearchHit hit : hits) {
@@ -169,7 +183,9 @@ public class Controller {
 
 	/* 
 	 * endpoint ingesting SearchQueryJob containing DSL string
+	 * @input Elasticsearch DSL 
 	 * @return list of dataResource objects matching criteria
+	 * nice JSON formatting for Postman!
 	 */
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = API_ROOT + "/dslfordataresources", method = RequestMethod.POST, consumes = "application/json")
@@ -179,7 +195,7 @@ public class Controller {
 		ObjectMapper mapper = new ObjectMapper();
 		SearchHit[] hits;
 		try {
-			SearchResponse response = client.prepareSearch("pzmetadata").setTypes("DataResource").setSource(esDSL).get();
+			SearchResponse response = client.prepareSearch("pzmetadata").setTypes("DataResourceContainer").setSource(esDSL).get();
 			hits = response.getHits().getHits();
 		} catch (Exception exception) {
 			String message = String.format("Error Reconstituting DSL from SearchQueryJob: %s", exception.getMessage());
@@ -206,6 +222,7 @@ public class Controller {
 
 	/* 
 	 * endpoint ingesting SearchQueryJob containing DSL string
+	 * @input Elasticsearch SearchQueryJob containing DSL 
 	 * @return list of dataResource objects matching criteria
 	 */
 	@SuppressWarnings("unchecked")
@@ -229,7 +246,7 @@ public class Controller {
 		SearchResponse response;
 		SearchHit[] hits;
 		try {
-			response = client.prepareSearch("pzmetadata").setTypes("DataResource").setSource(reconDSLstring).get();
+			response = client.prepareSearch("pzmetadata").setTypes("DataResourceContainer").setSource(reconDSLstring).get();
 			hits = response.getHits().getHits();
 		} catch (Exception exception) {
 			String message = String.format("Error completing DSL to Elasticsearch from SearchQueryJob: %s", exception.getMessage());
