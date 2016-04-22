@@ -4,9 +4,11 @@ import model.data.DataResource;
 import piazza.services.query.util.GeoJsonDeserializer;
 import piazza.services.query.util.GeoJsonSerializer;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.elasticsearch.annotations.Document;
-import org.springframework.data.elasticsearch.core.geo.GeoPoint;
+import org.elasticsearch.common.geo.GeoPoint;
+
+//import org.springframework.data.annotation.Id;
+//import org.springframework.data.elasticsearch.annotations.Document;
+//import org.springframework.data.elasticsearch.core.geo.GeoPoint;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -18,9 +20,9 @@ import com.vividsolutions.jts.geom.Geometry;
  * @Document(indexName = "pzmetadata", type = "DataResource")
  */
 
-@Document(indexName = "pzmetadata", type = "DataResourceContainer")
+//@Document(indexName = "pzmetadata", type = "DataResourceContainer")
 public class DataResourceContainer {
-	@Id
+	//@Id
 	public String dataResourceContainerId;
 	public GeoPoint locationCenterPoint;
 	// serialize into ES GeoShape
