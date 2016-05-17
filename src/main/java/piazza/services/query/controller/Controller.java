@@ -45,6 +45,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import model.job.type.SearchQueryJob;
 import model.data.DataResource;
 import model.response.DataResourceListResponse;
+import model.response.ServiceListResponse;
+import model.service.metadata.Service;
 import util.PiazzaLogger;
 
 @RestController
@@ -271,6 +273,59 @@ public class Controller {
 		logger.log("\n\nResponse: " + mapper.writeValueAsString(responsePojos), PiazzaLogger.INFO);
 		//System.out.println("\n\nResponse: " + mapper.writeValueAsString(responsePojos));
 		return new DataResourceListResponse( responsePojos );
+	}
+
+	/* 
+	 * endpoint containing DSL string for service search
+	 * @input Elasticsearch  DSL 
+	 * @return list of Service objects matching criteria
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = API_ROOT + "/dslservices", method = RequestMethod.POST, consumes = "application/json")
+	public ServiceListResponse getServices(@RequestBody(required = true) Object esDSL)  throws Exception {
+		
+		ObjectMapper mapper = new ObjectMapper();
+		
+		// get reconstituted DSL string out of job object parameter
+		String reconDSLstring;
+		try {
+			reconDSLstring = mapper.writeValueAsString( esDSL );
+			//System.out.println("The Re-Constituted DSL query:");
+			//System.out.println( reconDSLstring );
+		} catch (Exception exception) {
+			String message = String.format("Error Reconstituting DSL from SearchQueryJob: %s", exception.getMessage());
+			logger.log(message, PiazzaLogger.ERROR);
+			throw new Exception(message);
+		}
+		
+		SearchResponse response;
+		SearchHit[] hits;
+		try {
+			response = client.prepareSearch("pzservices").setTypes("ServiceContainer").setSource(reconDSLstring).get();
+			hits = response.getHits().getHits();
+		} catch (Exception exception) {
+			String message = String.format("Error completing DSL to Elasticsearch from Services Search: %s", exception.getMessage());
+			logger.log(message, PiazzaLogger.ERROR);
+			throw new Exception(message);
+		}
+		List<Service> responsePojos = new ArrayList<Service>();
+		for (SearchHit hit : hits) {
+			/*
+			Map<String, Object> json = hit.sourceAsMap();
+			System.out.println(json.get("dataResource").toString());
+			DataResource dr =  mapper.readValue( json.get("dataResource").toString(), DataResource.class);
+			responsePojos.add( dr );
+			//resultsList.add( json.get("dataResource").toString() );
+			 * */
+			//Map<String, Object> json = hit.sourceAsMap();
+			//System.out.println(json.get("dataResource").toString());
+			ServiceContainer sc =  mapper.readValue( hit.sourceAsString(), ServiceContainer.class);
+			responsePojos.add( sc.service );
+			//resultsList.add( json.get("dataResource").toString() );
+		}
+		logger.log("\n\nResponse: " + mapper.writeValueAsString(responsePojos), PiazzaLogger.INFO);
+		//System.out.println("\n\nResponse: " + mapper.writeValueAsString(responsePojos));
+		return new ServiceListResponse( responsePojos );
 	}
 
 }
