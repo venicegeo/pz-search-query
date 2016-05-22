@@ -36,6 +36,7 @@ public class DataResourceContainer {
 	public DataResourceContainer( DataResource dr )
 	{
 		dataResource = dr;
+		dataResourceContainerId = dataResource.getDataId();
 	}
 	
 	public GeoPoint getLocationCenterPoint() {

@@ -23,6 +23,7 @@ public class ServiceContainer {
 	public ServiceContainer( Service s )
 	{
 		service = s;
+		serviceContainerId = service.getServiceId();
 	}
 
 }
