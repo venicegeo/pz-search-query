@@ -15,6 +15,8 @@ import org.springframework.context.annotation.Configuration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import util.PiazzaLogger;
+
 @Configuration
 @EnableAutoConfiguration
 public class NativeElasticsearchTemplateConfiguration {
@@ -45,9 +47,20 @@ public class NativeElasticsearchTemplateConfiguration {
 		return transportClient;
 	}
 
+	/*
 	@Bean
 	public ObjectMapper mapper() {
 		return new ObjectMapper();
+	}
+*/	
+	/*
+	 * need local bean "wiring to JobCommons content (PiazzaLogger),
+	 * strategy to scan JC package fails because this project doesn't use other "util" 
+	 * members (e.g. UUIDgen)
+	 */
+	@Bean
+	public PiazzaLogger logger() {
+		return new PiazzaLogger();
 	}
 
 	@Bean

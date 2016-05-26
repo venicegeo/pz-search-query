@@ -57,7 +57,8 @@ public class Controller {
 	static final String SERVICESINDEX = "pzservices";
 	static final String SERVICESTYPE = "ServiceContainer";
 
-	private PiazzaLogger logger = new PiazzaLogger();
+	@Autowired
+	private PiazzaLogger logger;
 	private final String API_ROOT = "${api.basepath}";
 	@Autowired
 	private Client client;
