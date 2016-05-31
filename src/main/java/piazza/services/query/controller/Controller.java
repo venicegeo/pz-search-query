@@ -201,14 +201,15 @@ public class Controller {
 		
 		// get reconstituted DSL string out of job object parameter
 		ObjectMapper mapper = new ObjectMapper();
-		SearchHit[] hits;
+		SearchHit[] hits = null;
 		try {
 			SearchResponse response = client.prepareSearch(DATAINDEX).setTypes(DATATYPE).setSource(esDSL).get();
 			hits = response.getHits().getHits();
 		} catch (Exception exception) {
+			exception.printStackTrace();
 			String message = String.format("Error Reconstituting DSL from SearchQueryJob: %s", exception.getMessage());
 			logger.log(message, PiazzaLogger.ERROR);
-			throw new Exception(message);
+			//throw new Exception(message);
 		}
 		
 //		List<String> resultsList = new ArrayList<String>();
