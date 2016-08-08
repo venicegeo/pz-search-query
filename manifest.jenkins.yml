@@ -3,7 +3,7 @@ applications:
   host: pz-search-query
   path: pz-search-query.jar
   buildpack: https://github.com/cloudfoundry/java-buildpack.git
-  domain: stage.geointservices.io
+  domain: int.geointservices.io
   memory: 512M
   instances: 1
   timeout: 180
