@@ -56,6 +56,7 @@ public class Controller {
 	static final String DATATYPE = "DataResourceContainer";
 	static final String SERVICESINDEX = "pzservices";
 	static final String SERVICESTYPE = "ServiceContainer";
+	static final int maxreturncount = 10000;
 
 	@Autowired
 	private PiazzaLogger logger;
@@ -103,7 +104,7 @@ public class Controller {
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = API_ROOT + "/dataIds", method = RequestMethod.POST, consumes = "application/json")
 	public List<String> getMetadataIds(@RequestBody(required = true) String esDSL) {
-		SearchResponse response = client.prepareSearch(DATAINDEX).setTypes(DATATYPE).setSource(esDSL).get();
+		SearchResponse response = client.prepareSearch(DATAINDEX).setTypes(DATATYPE).setSize(maxreturncount).setSource(esDSL).get();
 		SearchHit[] hits = response.getHits().getHits();
 		List<String> resultsList = new ArrayList<String>();
 		for (SearchHit hit : hits) {
@@ -116,7 +117,7 @@ public class Controller {
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = API_ROOT + "/datafull", method = RequestMethod.POST, consumes = "application/json")
 	public List<String> getMetadataFull(@RequestBody(required = true) String esDSL)   throws Exception {
-		SearchResponse response = client.prepareSearch(DATAINDEX).setTypes(DATATYPE).setSource(esDSL).get();
+		SearchResponse response = client.prepareSearch(DATAINDEX).setTypes(DATATYPE).setSize(maxreturncount).setSource(esDSL).get();
 		SearchHit[] hits = response.getHits().getHits();
 		ObjectMapper mapper = new ObjectMapper();
 		List<String> resultsList = new ArrayList<String>();
@@ -173,7 +174,7 @@ public class Controller {
 			
 		try {
 			ObjectMapper mapper = new ObjectMapper();
-			SearchResponse response = client.prepareSearch(DATAINDEX).setTypes(DATATYPE).setSource(reconDSLstring).get();
+			SearchResponse response = client.prepareSearch(DATAINDEX).setTypes(DATATYPE).setSize(maxreturncount).setSource(reconDSLstring).get();
 			SearchHit[] hits = response.getHits().getHits();
 			List<String> resultsList = new ArrayList<String>();
 			for (SearchHit hit : hits) {
@@ -203,7 +204,7 @@ public class Controller {
 		ObjectMapper mapper = new ObjectMapper();
 		SearchHit[] hits = null;
 		try {
-			SearchResponse response = client.prepareSearch(DATAINDEX).setTypes(DATATYPE).setSource(esDSL).get();
+			SearchResponse response = client.prepareSearch(DATAINDEX).setTypes(DATATYPE).setSize(maxreturncount).setSource(esDSL).get();
 			hits = response.getHits().getHits();
 		} catch (Exception exception) {
 			exception.printStackTrace();
@@ -255,7 +256,7 @@ public class Controller {
 		SearchResponse response;
 		SearchHit[] hits;
 		try {
-			response = client.prepareSearch(DATAINDEX).setTypes(DATATYPE).setSource(reconDSLstring).get();
+			response = client.prepareSearch(DATAINDEX).setTypes(DATATYPE).setSize(maxreturncount).setSource(reconDSLstring).get();
 			hits = response.getHits().getHits();
 		} catch (Exception exception) {
 			String message = String.format("Error completing DSL to Elasticsearch from SearchQueryJob: %s", exception.getMessage());
@@ -308,7 +309,7 @@ public class Controller {
 		SearchResponse response;
 		SearchHit[] hits;
 		try {
-			response = client.prepareSearch(SERVICESINDEX).setTypes(SERVICESTYPE).setSource(reconDSLstring).get();
+			response = client.prepareSearch(SERVICESINDEX).setTypes(SERVICESTYPE).setSize(maxreturncount).setSource(reconDSLstring).get();
 			hits = response.getHits().getHits();
 		} catch (Exception exception) {
 			String message = String.format("Error completing DSL to Elasticsearch from Services Search: %s", exception.getMessage());
