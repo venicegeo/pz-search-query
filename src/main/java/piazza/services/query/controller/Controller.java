@@ -56,7 +56,7 @@ public class Controller {
 	static final String DATATYPE = "DataResourceContainer";
 	static final String SERVICESINDEX = "pzservices";
 	static final String SERVICESTYPE = "ServiceContainer";
-	static final int maxreturncount = 10000;
+	static final int maxreturncount = 1000;
 
 	@Autowired
 	private PiazzaLogger logger;
@@ -67,7 +67,7 @@ public class Controller {
 	@RequestMapping("/")
 	@ResponseBody
 	String home() {
-		return "Hello Piazza Search Query! DSL-input endpoint at /api/v1/data";
+		return "Hello Piazza Search Query! DSL-input endpoint at /api/v1/datafull";
 	}
 
 	@SuppressWarnings("unchecked")
@@ -104,7 +104,7 @@ public class Controller {
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = API_ROOT + "/dataIds", method = RequestMethod.POST, consumes = "application/json")
 	public List<String> getMetadataIds(@RequestBody(required = true) String esDSL) {
-		SearchResponse response = client.prepareSearch(DATAINDEX).setTypes(DATATYPE).setSize(maxreturncount).setSource(esDSL).get();
+		SearchResponse response = client.prepareSearch(DATAINDEX).setTypes(DATATYPE).setSize(maxreturncount).setQuery(esDSL).execute().actionGet();
 		SearchHit[] hits = response.getHits().getHits();
 		List<String> resultsList = new ArrayList<String>();
 		for (SearchHit hit : hits) {
@@ -117,7 +117,9 @@ public class Controller {
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = API_ROOT + "/datafull", method = RequestMethod.POST, consumes = "application/json")
 	public List<String> getMetadataFull(@RequestBody(required = true) String esDSL)   throws Exception {
-		SearchResponse response = client.prepareSearch(DATAINDEX).setTypes(DATATYPE).setSize(maxreturncount).setSource(esDSL).get();
+		SearchResponse response = client.prepareSearch(DATAINDEX).setTypes(DATATYPE).setSize(maxreturncount).setQuery(esDSL).get();
+//		SearchResponse response = client.prepareSearch(DATAINDEX).setTypes(DATATYPE).setSize(maxreturncount).setExtraSource(esDSL).get();
+//		SearchResponse response = client.prepareSearch(DATAINDEX).setTypes(DATATYPE).setSize(maxreturncount).setExtraSource(esDSL).execute().actionGet();
 		SearchHit[] hits = response.getHits().getHits();
 		ObjectMapper mapper = new ObjectMapper();
 		List<String> resultsList = new ArrayList<String>();
@@ -174,7 +176,7 @@ public class Controller {
 			
 		try {
 			ObjectMapper mapper = new ObjectMapper();
-			SearchResponse response = client.prepareSearch(DATAINDEX).setTypes(DATATYPE).setSize(maxreturncount).setSource(reconDSLstring).get();
+			SearchResponse response = client.prepareSearch(DATAINDEX).setTypes(DATATYPE).setSize(maxreturncount).setQuery(reconDSLstring).get();
 			SearchHit[] hits = response.getHits().getHits();
 			List<String> resultsList = new ArrayList<String>();
 			for (SearchHit hit : hits) {
@@ -204,7 +206,7 @@ public class Controller {
 		ObjectMapper mapper = new ObjectMapper();
 		SearchHit[] hits = null;
 		try {
-			SearchResponse response = client.prepareSearch(DATAINDEX).setTypes(DATATYPE).setSize(maxreturncount).setSource(esDSL).get();
+			SearchResponse response = client.prepareSearch(DATAINDEX).setTypes(DATATYPE).setSize(maxreturncount).setQuery(esDSL).get();
 			hits = response.getHits().getHits();
 		} catch (Exception exception) {
 			exception.printStackTrace();
@@ -256,7 +258,7 @@ public class Controller {
 		SearchResponse response;
 		SearchHit[] hits;
 		try {
-			response = client.prepareSearch(DATAINDEX).setTypes(DATATYPE).setSize(maxreturncount).setSource(reconDSLstring).get();
+			response = client.prepareSearch(DATAINDEX).setTypes(DATATYPE).setSize(maxreturncount).setQuery(reconDSLstring).get();
 			hits = response.getHits().getHits();
 		} catch (Exception exception) {
 			String message = String.format("Error completing DSL to Elasticsearch from SearchQueryJob: %s", exception.getMessage());
@@ -309,7 +311,7 @@ public class Controller {
 		SearchResponse response;
 		SearchHit[] hits;
 		try {
-			response = client.prepareSearch(SERVICESINDEX).setTypes(SERVICESTYPE).setSize(maxreturncount).setSource(reconDSLstring).get();
+			response = client.prepareSearch(SERVICESINDEX).setTypes(SERVICESTYPE).setSize(maxreturncount).setQuery(reconDSLstring).get();
 			hits = response.getHits().getHits();
 		} catch (Exception exception) {
 			String message = String.format("Error completing DSL to Elasticsearch from Services Search: %s", exception.getMessage());
