@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-package piazza.commons.elasticsearch;
+package services.query.test;
 
-import java.util.Date;
+/**
+ * Tests logic in the Controller.
+ * 
+ * @author Patrick.Doody
+ *
+ */
+public class ControllerTests {
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
-public interface ESPartitionedModel extends ESModel {
-
-	@JsonIgnore
-	public Date getPartitionDate();
 }
