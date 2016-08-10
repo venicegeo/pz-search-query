@@ -15,6 +15,20 @@
  **/
 package services.query.test;
 
+import java.io.IOException;
+
+import org.elasticsearch.client.Client;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.mock.web.MockHttpServletResponse;
+
+import piazza.services.query.controller.Controller;
+import util.PiazzaLogger;
+
 /**
  * Tests logic in the Controller.
  * 
@@ -22,5 +36,28 @@ package services.query.test;
  *
  */
 public class ControllerTests {
+	@Mock
+	private PiazzaLogger logger;
+	@Mock
+	private Client client;
+	@InjectMocks
+	private Controller controller;
 
+	/**
+	 * Initial test setup
+	 */
+	@Before
+	public void setup() {
+		MockitoAnnotations.initMocks(this);
+	}
+
+	/**
+	 * Tests admin/stats endpoint
+	 */
+	@Test
+	public void testAdminStats() throws IOException {
+		// Ensuring no Exceptions are thrown
+		MockHttpServletResponse mockResponse = new MockHttpServletResponse();
+		controller.stats(mockResponse);
+	}
 }
