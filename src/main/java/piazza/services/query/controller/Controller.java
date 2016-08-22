@@ -28,6 +28,7 @@ import org.elasticsearch.action.count.CountResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHitField;
+import org.elasticsearch.search.sort.SortOrder;
 //import static org.elasticsearch.index.query.FilterBuilders.*;
 import org.elasticsearch.index.query.*;
 
@@ -60,7 +61,8 @@ public class Controller {
 	static final int maxreturncount = 1000;
 	private static final String DEFAULT_PAGE_SIZE = "10";
 	private static final String DEFAULT_PAGE = "0";
-	private static final String DEFAULT_SORTBY = "resourceMetadata.metadata.createdOn";
+	private static final String DEFAULT_SORTBY = "dataResource.metadata.createdOn";
+	private static final String DEFAULT_SERVICE_SORTBY = "service.serviceId";
 	private static final String DEFAULT_ORDER = "asc";
 
 	@Autowired
@@ -114,7 +116,12 @@ public class Controller {
 			@RequestParam(value = "order", required = false, defaultValue = DEFAULT_ORDER) String order,
 			@RequestParam(value = "sortBy", required = false, defaultValue = DEFAULT_SORTBY) String sortBy
 	) {
-		SearchResponse response = client.prepareSearch(DATAINDEX).setTypes(DATATYPE).setSize(maxreturncount).setQuery(esDSL).execute().actionGet();
+		
+		SearchResponse response = client.prepareSearch(DATAINDEX).setTypes(DATATYPE).
+				setFrom( page.intValue() * perPage.intValue() ).
+				setSize( perPage.intValue() ).
+				addSort( sortBy, SortOrder.valueOf( order.toUpperCase() ) ).
+				setQuery(esDSL).get();
 		SearchHit[] hits = response.getHits().getHits();
 		List<String> resultsList = new ArrayList<String>();
 		for (SearchHit hit : hits) {
@@ -132,7 +139,12 @@ public class Controller {
 			@RequestParam(value = "order", required = false, defaultValue = DEFAULT_ORDER) String order,
 			@RequestParam(value = "sortBy", required = false, defaultValue = DEFAULT_SORTBY) String sortBy
 	)   throws Exception {
-		SearchResponse response = client.prepareSearch(DATAINDEX).setTypes(DATATYPE).setSize(maxreturncount).setQuery(esDSL).get();
+		
+		SearchResponse response = client.prepareSearch(DATAINDEX).setTypes(DATATYPE).
+				setFrom( page.intValue() * perPage.intValue() ).
+				setSize( perPage.intValue() ).
+				addSort( sortBy, SortOrder.valueOf( order.toUpperCase() ) ).
+				setQuery(esDSL).get();
 //		SearchResponse response = client.prepareSearch(DATAINDEX).setTypes(DATATYPE).setSize(maxreturncount).setExtraSource(esDSL).get();
 //		SearchResponse response = client.prepareSearch(DATAINDEX).setTypes(DATATYPE).setSize(maxreturncount).setExtraSource(esDSL).execute().actionGet();
 		SearchHit[] hits = response.getHits().getHits();
@@ -196,7 +208,11 @@ public class Controller {
 			
 		try {
 			ObjectMapper mapper = new ObjectMapper();
-			SearchResponse response = client.prepareSearch(DATAINDEX).setTypes(DATATYPE).setSize(maxreturncount).setQuery(reconDSLstring).get();
+			SearchResponse response = client.prepareSearch(DATAINDEX).setTypes(DATATYPE).
+					setFrom( page.intValue() * perPage.intValue() ).
+					setSize( perPage.intValue() ).
+					addSort( sortBy, SortOrder.valueOf( order.toUpperCase() ) ).
+					setQuery(reconDSLstring).get();
 			SearchHit[] hits = response.getHits().getHits();
 			List<String> resultsList = new ArrayList<String>();
 			for (SearchHit hit : hits) {
@@ -232,7 +248,11 @@ public class Controller {
 		ObjectMapper mapper = new ObjectMapper();
 		SearchHit[] hits = null;
 		try {
-			SearchResponse response = client.prepareSearch(DATAINDEX).setTypes(DATATYPE).setSize(maxreturncount).setQuery(esDSL).get();
+			SearchResponse response = client.prepareSearch(DATAINDEX).setTypes(DATATYPE).
+					setFrom( page.intValue() * perPage.intValue() ).
+					setSize( perPage.intValue() ).
+					addSort( sortBy, SortOrder.valueOf( order.toUpperCase() ) ).
+					setQuery(esDSL).get();
 			hits = response.getHits().getHits();
 		} catch (Exception exception) {
 			exception.printStackTrace();
@@ -289,7 +309,11 @@ public class Controller {
 		SearchResponse response;
 		SearchHit[] hits;
 		try {
-			response = client.prepareSearch(DATAINDEX).setTypes(DATATYPE).setSize(maxreturncount).setQuery(reconDSLstring).get();
+			response = client.prepareSearch(DATAINDEX).setTypes(DATATYPE).
+					setFrom( page.intValue() * perPage.intValue() ).
+					setSize( perPage.intValue() ).
+					addSort( sortBy, SortOrder.valueOf( order.toUpperCase() ) ).
+					setQuery(reconDSLstring).get();
 			hits = response.getHits().getHits();
 		} catch (Exception exception) {
 			String message = String.format("Error completing DSL to Elasticsearch from SearchQueryJob: %s", exception.getMessage());
@@ -327,7 +351,7 @@ public class Controller {
 			@RequestParam(value = "page", required = false, defaultValue = DEFAULT_PAGE) Integer page,
 			@RequestParam(value = "perPage", required = false, defaultValue = DEFAULT_PAGE_SIZE) Integer perPage,
 			@RequestParam(value = "order", required = false, defaultValue = DEFAULT_ORDER) String order,
-			@RequestParam(value = "sortBy", required = false, defaultValue = DEFAULT_SORTBY) String sortBy
+			@RequestParam(value = "sortBy", required = false, defaultValue = DEFAULT_SERVICE_SORTBY) String sortBy
 	)  throws Exception {
 		
 		ObjectMapper mapper = new ObjectMapper();
@@ -347,7 +371,11 @@ public class Controller {
 		SearchResponse response;
 		SearchHit[] hits;
 		try {
-			response = client.prepareSearch(SERVICESINDEX).setTypes(SERVICESTYPE).setSize(maxreturncount).setQuery(reconDSLstring).get();
+			response = client.prepareSearch(SERVICESINDEX).setTypes(SERVICESTYPE).
+					setFrom( page.intValue() * perPage.intValue() ).
+					setSize( perPage.intValue() ).
+					addSort( sortBy, SortOrder.valueOf( order.toUpperCase() ) ).
+					setQuery(reconDSLstring).get();
 			hits = response.getHits().getHits();
 		} catch (Exception exception) {
 			String message = String.format("Error completing DSL to Elasticsearch from Services Search: %s", exception.getMessage());
