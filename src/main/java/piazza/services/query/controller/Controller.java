@@ -35,6 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -57,6 +58,10 @@ public class Controller {
 	static final String SERVICESINDEX = "pzservices";
 	static final String SERVICESTYPE = "ServiceContainer";
 	static final int maxreturncount = 1000;
+	private static final String DEFAULT_PAGE_SIZE = "10";
+	private static final String DEFAULT_PAGE = "0";
+	private static final String DEFAULT_SORTBY = "resourceMetadata.metadata.createdOn";
+	private static final String DEFAULT_ORDER = "asc";
 
 	@Autowired
 	private PiazzaLogger logger;
@@ -103,7 +108,12 @@ public class Controller {
 	
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = API_ROOT + "/dataIds", method = RequestMethod.POST, consumes = "application/json")
-	public List<String> getMetadataIds(@RequestBody(required = true) String esDSL) {
+	public List<String> getMetadataIds(@RequestBody(required = true) String esDSL,
+			@RequestParam(value = "page", required = false, defaultValue = DEFAULT_PAGE) Integer page,
+			@RequestParam(value = "perPage", required = false, defaultValue = DEFAULT_PAGE_SIZE) Integer perPage,
+			@RequestParam(value = "order", required = false, defaultValue = DEFAULT_ORDER) String order,
+			@RequestParam(value = "sortBy", required = false, defaultValue = DEFAULT_SORTBY) String sortBy
+	) {
 		SearchResponse response = client.prepareSearch(DATAINDEX).setTypes(DATATYPE).setSize(maxreturncount).setQuery(esDSL).execute().actionGet();
 		SearchHit[] hits = response.getHits().getHits();
 		List<String> resultsList = new ArrayList<String>();
@@ -116,7 +126,12 @@ public class Controller {
 
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = API_ROOT + "/datafull", method = RequestMethod.POST, consumes = "application/json")
-	public List<String> getMetadataFull(@RequestBody(required = true) String esDSL)   throws Exception {
+	public List<String> getMetadataFull(@RequestBody(required = true) String esDSL,
+			@RequestParam(value = "page", required = false, defaultValue = DEFAULT_PAGE) Integer page,
+			@RequestParam(value = "perPage", required = false, defaultValue = DEFAULT_PAGE_SIZE) Integer perPage,
+			@RequestParam(value = "order", required = false, defaultValue = DEFAULT_ORDER) String order,
+			@RequestParam(value = "sortBy", required = false, defaultValue = DEFAULT_SORTBY) String sortBy
+	)   throws Exception {
 		SearchResponse response = client.prepareSearch(DATAINDEX).setTypes(DATATYPE).setSize(maxreturncount).setQuery(esDSL).get();
 //		SearchResponse response = client.prepareSearch(DATAINDEX).setTypes(DATATYPE).setSize(maxreturncount).setExtraSource(esDSL).get();
 //		SearchResponse response = client.prepareSearch(DATAINDEX).setTypes(DATATYPE).setSize(maxreturncount).setExtraSource(esDSL).execute().actionGet();
@@ -161,7 +176,12 @@ public class Controller {
 
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = API_ROOT + "/dslforJSON", method = RequestMethod.POST, consumes = "application/json")
-	public List<String> getMetadataJobToJSON(@RequestBody(required = true) SearchQueryJob esDSLJob)  throws Exception {
+	public List<String> getMetadataJobToJSON(@RequestBody(required = true) SearchQueryJob esDSLJob,
+			@RequestParam(value = "page", required = false, defaultValue = DEFAULT_PAGE) Integer page,
+			@RequestParam(value = "perPage", required = false, defaultValue = DEFAULT_PAGE_SIZE) Integer perPage,
+			@RequestParam(value = "order", required = false, defaultValue = DEFAULT_ORDER) String order,
+			@RequestParam(value = "sortBy", required = false, defaultValue = DEFAULT_SORTBY) String sortBy
+	)  throws Exception {
 		
 		// get reconstituted DSL string out of job object parameter
 		String reconDSLstring;
@@ -198,9 +218,15 @@ public class Controller {
 	 * @return list of dataResource objects matching criteria
 	 * nice JSON formatting for Postman!
 	 */
-	@SuppressWarnings("unchecked")
-	@RequestMapping(value = API_ROOT + "/dslfordataresources", method = RequestMethod.POST, consumes = "application/json")
-	public DataResourceListResponse getDSLtoDRs(@RequestBody(required = true) String esDSL)  throws Exception {
+
+		@SuppressWarnings("unchecked")
+		@RequestMapping(value = API_ROOT + "/dslfordataresources", method = RequestMethod.POST, consumes = "application/json")
+		public DataResourceListResponse getDSLtoDRs(@RequestBody(required = true) String esDSL,
+				@RequestParam(value = "page", required = false, defaultValue = DEFAULT_PAGE) Integer page,
+				@RequestParam(value = "perPage", required = false, defaultValue = DEFAULT_PAGE_SIZE) Integer perPage,
+				@RequestParam(value = "order", required = false, defaultValue = DEFAULT_ORDER) String order,
+				@RequestParam(value = "sortBy", required = false, defaultValue = DEFAULT_SORTBY) String sortBy
+		)  throws Exception {
 		
 		// get reconstituted DSL string out of job object parameter
 		ObjectMapper mapper = new ObjectMapper();
@@ -239,7 +265,12 @@ public class Controller {
 	 */
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = API_ROOT + "/dsl", method = RequestMethod.POST, consumes = "application/json")
-	public DataResourceListResponse getMetadataJob(@RequestBody(required = true) SearchQueryJob esDSLJob)  throws Exception {
+	public DataResourceListResponse getMetadataJob(@RequestBody(required = true) SearchQueryJob esDSLJob,
+			@RequestParam(value = "page", required = false, defaultValue = DEFAULT_PAGE) Integer page,
+			@RequestParam(value = "perPage", required = false, defaultValue = DEFAULT_PAGE_SIZE) Integer perPage,
+			@RequestParam(value = "order", required = false, defaultValue = DEFAULT_ORDER) String order,
+			@RequestParam(value = "sortBy", required = false, defaultValue = DEFAULT_SORTBY) String sortBy
+	)  throws Exception {
 		
 		ObjectMapper mapper = new ObjectMapper();
 		
@@ -292,7 +323,12 @@ public class Controller {
 	 */
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = API_ROOT + "/dslservices", method = RequestMethod.POST, consumes = "application/json")
-	public ServiceListResponse getServices(@RequestBody(required = true) Object esDSL)  throws Exception {
+	public ServiceListResponse getServices(@RequestBody(required = true) Object esDSL,
+			@RequestParam(value = "page", required = false, defaultValue = DEFAULT_PAGE) Integer page,
+			@RequestParam(value = "perPage", required = false, defaultValue = DEFAULT_PAGE_SIZE) Integer perPage,
+			@RequestParam(value = "order", required = false, defaultValue = DEFAULT_ORDER) String order,
+			@RequestParam(value = "sortBy", required = false, defaultValue = DEFAULT_SORTBY) String sortBy
+	)  throws Exception {
 		
 		ObjectMapper mapper = new ObjectMapper();
 		
