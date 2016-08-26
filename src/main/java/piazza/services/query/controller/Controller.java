@@ -244,8 +244,7 @@ public class Controller {
 				@RequestParam(value = "sortBy", required = false, defaultValue = DEFAULT_SORTBY) String sortBy
 		)  throws Exception {
 		
-		// get reconstituted DSL string out of job object parameter
-		ObjectMapper mapper = new ObjectMapper();
+			
 		SearchHit[] hits = null;
 		try {
 			SearchResponse response = client.prepareSearch(DATAINDEX).setTypes(DATATYPE).
@@ -256,12 +255,14 @@ public class Controller {
 			hits = response.getHits().getHits();
 		} catch (Exception exception) {
 			exception.printStackTrace();
-			String message = String.format("Error Reconstituting DSL from SearchQueryJob: %s", exception.getMessage());
+			String message = String.format("Error constructing SearchResponse, client.prepareSearch- page.intValue:%d,  perPage.intValue:%d,  sortBy:%s,  order:%s,  exception:%s, query DSL: %s", 
+														page.intValue(), perPage.intValue(), sortBy, order, esDSL, exception.getMessage());
 			logger.log(message, PiazzaLogger.ERROR);
 			//throw new Exception(message);
 		}
 		
 //		List<String> resultsList = new ArrayList<String>();
+		ObjectMapper mapper = new ObjectMapper();
 		List<DataResource> responsePojos = new ArrayList<DataResource>();
 		for (SearchHit hit : hits) {
 //			resultsList.add( hit.sourceAsString() );  // whole dataResource container
