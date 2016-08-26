@@ -59,11 +59,11 @@ public class Controller {
 	static final String SERVICESINDEX = "pzservices";
 	static final String SERVICESTYPE = "ServiceContainer";
 	static final int maxreturncount = 1000;
-	private static final String DEFAULT_PAGE_SIZE = "10";
-	private static final String DEFAULT_PAGE = "0";
-	private static final String DEFAULT_SORTBY = "dataResource.metadata.createdOn";
-	private static final String DEFAULT_SERVICE_SORTBY = "service.serviceId";
-	private static final String DEFAULT_ORDER = "asc";
+	static final String DEFAULT_PAGE_SIZE = "10";
+	static final String DEFAULT_PAGE = "0";
+	static final String DEFAULT_SORTBY = "dataResource.metadata.createdOn";
+	static final String DEFAULT_SERVICE_SORTBY = "service.serviceId";
+	static final String DEFAULT_ORDER = "asc";
 
 	@Autowired
 	private PiazzaLogger logger;
@@ -256,7 +256,8 @@ public class Controller {
 		} catch (Exception exception) {
 			exception.printStackTrace();
 			String message = String.format("Error constructing SearchResponse, client.prepareSearch- page.intValue:%d,  perPage.intValue:%d,  sortBy:%s,  order:%s,  exception:%s, query DSL: %s", 
-														page.intValue(), perPage.intValue(), sortBy, order, esDSL, exception.getMessage());
+														page.intValue(), perPage.intValue(), sortBy, order, exception.getMessage(), esDSL );
+			System.out.println(message);
 			logger.log(message, PiazzaLogger.ERROR);
 			//throw new Exception(message);
 		}
