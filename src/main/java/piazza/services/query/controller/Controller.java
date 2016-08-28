@@ -63,7 +63,7 @@ public class Controller {
 	static final String DEFAULT_PAGE = "0";
 	static final String DEFAULT_SORTBY = "dataResource.metadata.createdOn";
 	static final String DEFAULT_SERVICE_SORTBY = "service.serviceId";
-	static final String DEFAULT_ORDER = "asc";
+	static final String DEFAULT_ORDER = "desc";
 
 	@Autowired
 	private PiazzaLogger logger;
