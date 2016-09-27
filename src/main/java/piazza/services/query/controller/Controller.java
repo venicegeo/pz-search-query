@@ -106,7 +106,13 @@ public class Controller {
 	public void stats(HttpServletResponse response) throws IOException {
 		 response.sendRedirect("/metrics");
 	}
-	
+
+	@RequestMapping(value = "/voyagerJSON",  method = RequestMethod.GET)
+	@ResponseBody
+	public String voyagerJSON() throws IOException {
+		response.sendRedirect( "${voyager.json}" );
+	}
+
 	
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = API_ROOT + "/dataIds", method = RequestMethod.POST, consumes = "application/json")
