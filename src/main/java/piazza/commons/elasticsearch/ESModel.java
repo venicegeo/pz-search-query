@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-package piazza.commons.elasticsearch;
+/*package piazza.commons.elasticsearch;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -25,3 +25,4 @@ public interface ESModel {
 	@JsonIgnore
 	public void setId(String id);
 }
+*/
