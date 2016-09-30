@@ -29,6 +29,8 @@ import org.elasticsearch.client.Client;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHitField;
 import org.elasticsearch.search.sort.SortOrder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 //import static org.elasticsearch.index.query.FilterBuilders.*;
 import org.elasticsearch.index.query.*;
 
@@ -71,6 +73,8 @@ public class Controller {
 	@Autowired
 	private Client client;
 
+	private final static Logger LOGGER = LoggerFactory.getLogger(Controller.class);
+	
 	@RequestMapping("/")
 	@ResponseBody
 	String home() {
@@ -254,12 +258,10 @@ public class Controller {
 					setQuery(esDSL).get();
 			hits = response.getHits().getHits();
 		} catch (Exception exception) {
-			exception.printStackTrace();
 			String message = String.format("Error constructing SearchResponse, client.prepareSearch- page.intValue:%d,  perPage.intValue:%d,  sortBy:%s,  order:%s,  exception:%s, query DSL: %s", 
 														page.intValue(), perPage.intValue(), sortBy, order, exception.getMessage(), esDSL );
-			System.out.println(message);
+			LOGGER.error(message);
 			logger.log(message, PiazzaLogger.ERROR);
-			//throw new Exception(message);
 		}
 		
 //		List<String> resultsList = new ArrayList<String>();
