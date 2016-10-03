@@ -40,7 +40,6 @@ import util.PiazzaLogger;
 
 public class GeoJsonSerializer extends JsonSerializer<Geometry> {
 	
-	//private final Logger log = LoggerFactory.getLogger(this.getClass());
 	@Autowired
 	private PiazzaLogger logger;
 	
@@ -75,11 +74,9 @@ public class GeoJsonSerializer extends JsonSerializer<Geometry> {
         } else if (value instanceof GeometryCollection) {
             writeGeometryCollection(jgen, (GeometryCollection) value);
         } else {
-			String message = String.format("Failed to serialize Geometry to GeoJSON, unsupported type.");
+			String message = "Failed to serialize Geometry to GeoJSON, unsupported type.";
 			logger.log(message, PiazzaLogger.ERROR);
-        	//log.error("Failed to serialize Geometry to GeoJSON, unsupported type.");
-            throw new UnsupportedOperationException("not implemented: "
-                    + value.getClass().getName());
+            throw new UnsupportedOperationException("not implemented: " + value.getClass().getName());
         }
     }
 

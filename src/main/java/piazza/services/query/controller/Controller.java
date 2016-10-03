@@ -27,9 +27,12 @@ import org.elasticsearch.action.count.CountResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 //import static org.elasticsearch.index.query.FilterBuilders.*;
+//import static org.elasticsearch.index.query.FilterBuilders.*;
 import org.elasticsearch.index.query.WrapperQueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.sort.SortOrder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -65,6 +68,8 @@ public class Controller {
 	private final String API_ROOT = "${api.basepath}";
 	@Autowired
 	private Client client;
+
+	private final static Logger LOGGER = LoggerFactory.getLogger(Controller.class);
 
 	@RequestMapping("/")
 	@ResponseBody
@@ -187,13 +192,11 @@ public class Controller {
 					.setSize(perPage.intValue()).addSort(sortBy, SortOrder.valueOf(order.toUpperCase())).setQuery(esDSL).get();
 			hits = response.getHits().getHits();
 		} catch (Exception exception) {
-			exception.printStackTrace();
 			String message = String.format(
 					"Error constructing SearchResponse, client.prepareSearch- page.intValue:%d,  perPage.intValue:%d,  sortBy:%s,  order:%s,  exception:%s, query DSL: %s",
 					page.intValue(), perPage.intValue(), sortBy, order, exception.getMessage(), esDSL);
-			System.out.println(message);
+			LOGGER.error(message);
 			logger.log(message, PiazzaLogger.ERROR);
-			// throw new Exception(message);
 		}
 
 		// List<String> resultsList = new ArrayList<String>();
