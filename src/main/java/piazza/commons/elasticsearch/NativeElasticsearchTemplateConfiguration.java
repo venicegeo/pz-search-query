@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-package piazza.commons.elasticsearch;
+/*package piazza.commons.elasticsearch;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -62,17 +62,7 @@ public class NativeElasticsearchTemplateConfiguration {
 		return transportClient;
 	}
 
-	/*
-	@Bean
-	public ObjectMapper mapper() {
-		return new ObjectMapper();
-	}
-*/	
-	/*
-	 * need local bean "wiring to JobCommons content (PiazzaLogger),
-	 * strategy to scan JC package fails because this project doesn't use other "util" 
-	 * members (e.g. UUIDgen)
-	 */
+
 	@Bean
 	public PiazzaLogger logger() {
 		return new PiazzaLogger();
@@ -83,3 +73,4 @@ public class NativeElasticsearchTemplateConfiguration {
 		return new NativeElasticsearchTemplate(client, mapper);
 	}
 }
+*/

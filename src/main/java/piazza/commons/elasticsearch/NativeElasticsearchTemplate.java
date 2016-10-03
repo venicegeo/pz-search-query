@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
+/*
 package piazza.commons.elasticsearch;
 
 import java.util.ArrayList;
@@ -292,12 +293,13 @@ public class NativeElasticsearchTemplate
 		return response.getHits().getTotalHits();
 	}
 
-/* 2.x changes query builders CSS 5/14/16
+   // 2.x changes query builders CSS 5/14/16
 	public SearchRequestBuilder NativeSearchQueryBuilder() {
 		return new SearchRequestBuilder(
 			this.client);
 	}
-*/
+
+	
 	public SearchRequestBuilder NativeSearchQueryBuilder() {
 		return new SearchRequestBuilder(
 			this.client, null);
@@ -377,4 +379,4 @@ public class NativeElasticsearchTemplate
 
 		return success;
 	}
-}
+}*/

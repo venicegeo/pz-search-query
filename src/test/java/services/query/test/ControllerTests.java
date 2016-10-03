@@ -17,12 +17,13 @@ package services.query.test;
 
 import java.io.IOException;
 
+import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.mock.web.MockHttpServletResponse;
 
@@ -38,8 +39,6 @@ import util.PiazzaLogger;
 public class ControllerTests {
 	@Mock
 	private PiazzaLogger logger;
-	@Mock
-	private Client client;
 	@InjectMocks
 	private Controller controller;
 
@@ -59,5 +58,37 @@ public class ControllerTests {
 		// Ensuring no Exceptions are thrown
 		MockHttpServletResponse mockResponse = new MockHttpServletResponse();
 		controller.stats(mockResponse);
+	}
+
+	/**
+	 * Testing querying of data exception
+	 */
+	@Test(expected = Exception.class)
+	public void testQueryDataException() throws Exception {
+		controller.getDSLtoDRs("DSL", new Integer(0), new Integer(10), "asc", "metadata.name");
+	}
+
+	/**
+	 * Testing querying of services exception
+	 */
+	@Test(expected = Exception.class)
+	public void testQueryServiceException() throws Exception {
+		controller.getServices("DSL", new Integer(0), new Integer(10), "asc", "metadata.name");
+	}
+
+	/**
+	 * Test getting metadata exception
+	 */
+	@Test(expected = Exception.class)
+	public void testMetadataException() throws Exception {
+		controller.getMetadataFull("DSL", new Integer(0), new Integer(10), "asc", "metadata.name");
+	}
+
+	/**
+	 * Test getting metadata IDs
+	 */
+	@Test(expected = Exception.class)
+	public void testMetadataIdsException() throws Exception {
+		controller.getMetadataIds("DSL", new Integer(0), new Integer(10), "asc", "metadata.name");
 	}
 }
