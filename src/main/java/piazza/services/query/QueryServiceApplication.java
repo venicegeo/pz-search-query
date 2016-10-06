@@ -15,15 +15,40 @@
  **/
 package piazza.services.query;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
-@ComponentScan({"piazza, util"})
+@ComponentScan({ "piazza, util" })
 @SpringBootApplication
 public class QueryServiceApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(QueryServiceApplication.class, args); //NOSONAR
+		SpringApplication.run(QueryServiceApplication.class, args); // NOSONAR
+	}
+
+	@Configuration
+	protected static class GatewayConfig extends WebMvcConfigurerAdapter {
+		@Override
+		public void addInterceptors(InterceptorRegistry registry) {
+			registry.addInterceptor(new HandlerInterceptorAdapter() {
+				@Override
+				public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+					if ((request.getScheme().equals("http")) || (request.getHeader("X-Forwarded-Proto").equals("http"))) {
+						String redirectUrl = String.format("%s://%s%s", "https", request.getServerName(), request.getRequestURI());
+						response.sendRedirect(redirectUrl);
+						return false;
+					}
+					return true;
+				}
+			});
+		}
 	}
 }
