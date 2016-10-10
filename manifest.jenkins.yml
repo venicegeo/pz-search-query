@@ -2,7 +2,7 @@ applications:
 - name: pz-search-query
   host: pz-search-query
   path: pz-search-query.jar
-  buildpack: https://github.com/cloudfoundry/java-buildpack.git
+  buildpack: 'https://github.com/cloudfoundry/java-buildpack.git#v3.9'
   domain: int.geointservices.io
   memory: 512M
   instances: 1
