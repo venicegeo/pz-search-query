@@ -41,8 +41,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import exception.PiazzaJobException;
 import model.data.DataResource;
 import model.response.DataResourceListResponse;
 import model.response.ServiceListResponse;
@@ -124,7 +127,7 @@ public class Controller {
 			@RequestParam(value = "page", required = false, defaultValue = DEFAULT_PAGE) Integer page,
 			@RequestParam(value = "perPage", required = false, defaultValue = DEFAULT_PAGE_SIZE) Integer perPage,
 			@RequestParam(value = "order", required = false, defaultValue = DEFAULT_ORDER) String order,
-			@RequestParam(value = "sortBy", required = false, defaultValue = DEFAULT_SORTBY) String sortBy) throws Exception {
+			@RequestParam(value = "sortBy", required = false, defaultValue = DEFAULT_SORTBY) String sortBy) throws PiazzaJobException {
 
 		SearchResponse response = client.prepareSearch(DATAINDEX).setTypes(DATATYPE).setFrom(page.intValue() * perPage.intValue())
 				.setSize(perPage.intValue()).addSort(sortBy, SortOrder.valueOf(order.toUpperCase())).setQuery(esDSL).get();
@@ -165,8 +168,9 @@ public class Controller {
 			return resultsList;
 		} catch (Exception exception) {
 			String message = String.format("Error completing DSL to Elasticsearch: %s", exception.getMessage());
+			LOGGER.error(message, exception);
 			logger.log(message, PiazzaLogger.ERROR);
-			throw new Exception(message);
+			throw new PiazzaJobException(message);
 		}
 	}
 
@@ -184,7 +188,7 @@ public class Controller {
 			@RequestParam(value = "page", required = false, defaultValue = DEFAULT_PAGE) Integer page,
 			@RequestParam(value = "perPage", required = false, defaultValue = DEFAULT_PAGE_SIZE) Integer perPage,
 			@RequestParam(value = "order", required = false, defaultValue = DEFAULT_ORDER) String order,
-			@RequestParam(value = "sortBy", required = false, defaultValue = DEFAULT_SORTBY) String sortBy) throws Exception {
+			@RequestParam(value = "sortBy", required = false, defaultValue = DEFAULT_SORTBY) String sortBy) throws JsonParseException, JsonMappingException, IOException {
 
 		SearchHit[] hits = null;
 		try {
@@ -195,7 +199,7 @@ public class Controller {
 			String message = String.format(
 					"Error constructing SearchResponse, client.prepareSearch- page.intValue:%d,  perPage.intValue:%d,  sortBy:%s,  order:%s,  exception:%s, query DSL: %s",
 					page.intValue(), perPage.intValue(), sortBy, order, exception.getMessage(), esDSL);
-			LOGGER.error(message);
+			LOGGER.error(message, exception);
 			logger.log(message, PiazzaLogger.ERROR);
 		}
 
@@ -230,7 +234,7 @@ public class Controller {
 			@RequestParam(value = "page", required = false, defaultValue = DEFAULT_PAGE) Integer page,
 			@RequestParam(value = "perPage", required = false, defaultValue = DEFAULT_PAGE_SIZE) Integer perPage,
 			@RequestParam(value = "order", required = false, defaultValue = DEFAULT_ORDER) String order,
-			@RequestParam(value = "sortBy", required = false, defaultValue = DEFAULT_SERVICE_SORTBY) String sortBy) throws Exception {
+			@RequestParam(value = "sortBy", required = false, defaultValue = DEFAULT_SERVICE_SORTBY) String sortBy) throws JsonParseException, JsonMappingException, IOException {
 
 		ObjectMapper mapper = new ObjectMapper();
 
@@ -242,8 +246,9 @@ public class Controller {
 			// System.out.println( reconDSLstring );
 		} catch (Exception exception) {
 			String message = String.format("Error Reconstituting DSL from SearchQueryJob: %s", exception.getMessage());
+			LOGGER.error(message, exception);
 			logger.log(message, PiazzaLogger.ERROR);
-			throw new Exception(message);
+			throw new IOException(message);
 		}
 
 		SearchResponse response;
@@ -254,8 +259,9 @@ public class Controller {
 			hits = response.getHits().getHits();
 		} catch (Exception exception) {
 			String message = String.format("Error completing DSL to Elasticsearch from Services Search: %s", exception.getMessage());
+			LOGGER.error(message, exception);
 			logger.log(message, PiazzaLogger.ERROR);
-			throw new Exception(message);
+			throw new IOException(message);
 		}
 		List<Service> responsePojos = new ArrayList<Service>();
 		for (SearchHit hit : hits) {
