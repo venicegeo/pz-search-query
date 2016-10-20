@@ -108,10 +108,17 @@ public class Controller {
 			@RequestParam(value = "page", required = false, defaultValue = DEFAULT_PAGE) Integer page,
 			@RequestParam(value = "perPage", required = false, defaultValue = DEFAULT_PAGE_SIZE) Integer perPage,
 			@RequestParam(value = "order", required = false, defaultValue = DEFAULT_ORDER) String order,
-			@RequestParam(value = "sortBy", required = false, defaultValue = DEFAULT_SORTBY) String sortBy) {
+			@RequestParam(value = "sortBy", required = false ) String sortBy) {
 
-		SearchResponse response = client.prepareSearch(DATAINDEX).setTypes(DATATYPE).setFrom(page.intValue() * perPage.intValue())
-				.setSize(perPage.intValue()).addSort(sortBy, SortOrder.valueOf(order.toUpperCase())).setQuery(esDSL).get();
+		SearchResponse response;
+		
+		if( sortBy != null)
+			response = client.prepareSearch(DATAINDEX).setTypes(DATATYPE).setFrom(page.intValue() * perPage.intValue())
+			.setSize(perPage.intValue()).addSort(sortBy, SortOrder.valueOf(order.toUpperCase())).setQuery(esDSL).get();
+		else
+			response = client.prepareSearch(DATAINDEX).setTypes(DATATYPE).setFrom(page.intValue() * perPage.intValue())
+				.setSize(perPage.intValue()).setQuery(esDSL).get();
+		
 		SearchHit[] hits = response.getHits().getHits();
 		List<String> resultsList = new ArrayList<String>();
 		for (SearchHit hit : hits) {
@@ -127,14 +134,16 @@ public class Controller {
 			@RequestParam(value = "page", required = false, defaultValue = DEFAULT_PAGE) Integer page,
 			@RequestParam(value = "perPage", required = false, defaultValue = DEFAULT_PAGE_SIZE) Integer perPage,
 			@RequestParam(value = "order", required = false, defaultValue = DEFAULT_ORDER) String order,
-			@RequestParam(value = "sortBy", required = false, defaultValue = DEFAULT_SORTBY) String sortBy) throws PiazzaJobException {
+			@RequestParam(value = "sortBy", required = false ) String sortBy) throws PiazzaJobException {
 
-		SearchResponse response = client.prepareSearch(DATAINDEX).setTypes(DATATYPE).setFrom(page.intValue() * perPage.intValue())
-				.setSize(perPage.intValue()).addSort(sortBy, SortOrder.valueOf(order.toUpperCase())).setQuery(esDSL).get();
-		// SearchResponse response =
-		// client.prepareSearch(DATAINDEX).setTypes(DATATYPE).setSize(maxreturncount).setExtraSource(esDSL).get();
-		// SearchResponse response =
-		// client.prepareSearch(DATAINDEX).setTypes(DATATYPE).setSize(maxreturncount).setExtraSource(esDSL).execute().actionGet();
+		SearchResponse response;
+		
+		if( sortBy != null)
+			response = client.prepareSearch(DATAINDEX).setTypes(DATATYPE).setFrom(page.intValue() * perPage.intValue())
+			.setSize(perPage.intValue()).addSort(sortBy, SortOrder.valueOf(order.toUpperCase())).setQuery(esDSL).get();
+		else
+			response = client.prepareSearch(DATAINDEX).setTypes(DATATYPE).setFrom(page.intValue() * perPage.intValue())
+				.setSize(perPage.intValue()).setQuery(esDSL).get();
 		SearchHit[] hits = response.getHits().getHits();
 		ObjectMapper mapper = new ObjectMapper();
 		List<String> resultsList = new ArrayList<String>();
@@ -145,25 +154,6 @@ public class Controller {
 				DataResourceContainer drc = mapper.readValue(hit.sourceAsString(), DataResourceContainer.class);
 				DataResource dr = drc.dataResource;
 				resultsList.add(mapper.writeValueAsString(dr));
-				// resultsList.add( dr.toString() );
-				/*
-				 * Map<String, Object> json = hit.sourceAsMap();
-				 * System.out.println(json.get("dataResource").toString()); DataResource dr = mapper.readValue(
-				 * json.get("dataResource").toString(), DataResource.class); responsePojos.add( dr );
-				 */
-
-				// SearchHitField drField = hit.field("data");
-				// resultsList.add( drField.getValues().toString() );
-				// mapper.writeValueAsString( esDSLJob.getData() );
-				// same?
-				// Map<String, Object> json = hit.getSource();
-				// Map<String, Object> json = hit.sourceAsMap();
-				// System.out.println(json.get("dataResource"));
-				// Hmmm, dataResource sub-items are added in reverse order of expected
-				// Oh well, for now; won't matter when serialized into Java object
-				// resultsList.add( json.get("dataResource").toString() );
-				// System.out.println("Ready to add dataResource:");
-				// resultsList.add( (String) json.get("dataResource") );
 			}
 			return resultsList;
 		} catch (Exception exception) {

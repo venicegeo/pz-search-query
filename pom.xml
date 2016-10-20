@@ -31,7 +31,7 @@
 		<dependency>
 			<groupId>org.venice.piazza</groupId>
 			<artifactId>pz-jobcommon</artifactId>
-			<version>LATEST</version> <!-- LATEST for true deploy, vs. 1.0.0.BUILD-SNAPSHOT local snapshot -->
+			<version>LATEST</version>
 		</dependency>
 
 		<dependency>
@@ -98,7 +98,7 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-	
+
 	<profiles>
 		<profile>
 			<id>coverage-per-test</id>
