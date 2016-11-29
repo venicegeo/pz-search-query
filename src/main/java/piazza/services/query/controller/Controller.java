@@ -47,6 +47,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import exception.PiazzaJobException;
 import model.data.DataResource;
+import model.logger.Severity;
 import model.response.DataResourceListResponse;
 import model.response.ServiceListResponse;
 import model.service.metadata.Service;
@@ -159,7 +160,8 @@ public class Controller {
 		} catch (Exception exception) {
 			String message = String.format("Error completing DSL to Elasticsearch: %s", exception.getMessage());
 			LOGGER.error(message, exception);
-			logger.log(message, PiazzaLogger.ERROR);
+			logger.log(message, Severity.ERROR);
+			
 			throw new PiazzaJobException(message);
 		}
 	}
@@ -190,7 +192,7 @@ public class Controller {
 					"Error constructing SearchResponse, client.prepareSearch- page.intValue:%d,  perPage.intValue:%d,  sortBy:%s,  order:%s,  exception:%s, query DSL: %s",
 					page.intValue(), perPage.intValue(), sortBy, order, exception.getMessage(), esDSL);
 			LOGGER.error(message, exception);
-			logger.log(message, PiazzaLogger.ERROR);
+			logger.log(message, Severity.ERROR);
 		}
 
 		// List<String> resultsList = new ArrayList<String>();
@@ -237,7 +239,7 @@ public class Controller {
 		} catch (Exception exception) {
 			String message = String.format("Error Reconstituting DSL from SearchQueryJob: %s", exception.getMessage());
 			LOGGER.error(message, exception);
-			logger.log(message, PiazzaLogger.ERROR);
+			logger.log(message, Severity.ERROR);
 			throw new IOException(message);
 		}
 
@@ -250,7 +252,7 @@ public class Controller {
 		} catch (Exception exception) {
 			String message = String.format("Error completing DSL to Elasticsearch from Services Search: %s", exception.getMessage());
 			LOGGER.error(message, exception);
-			logger.log(message, PiazzaLogger.ERROR);
+			logger.log(message, Severity.ERROR);
 			throw new IOException(message);
 		}
 		List<Service> responsePojos = new ArrayList<Service>();
@@ -266,7 +268,7 @@ public class Controller {
 			responsePojos.add(sc.service);
 			// resultsList.add( json.get("dataResource").toString() );
 		}
-		logger.log("\n\nResponse: " + mapper.writeValueAsString(responsePojos), PiazzaLogger.INFO);
+		logger.log("\n\nResponse: " + mapper.writeValueAsString(responsePojos), Severity.INFORMATIONAL);
 		// System.out.println("\n\nResponse: " + mapper.writeValueAsString(responsePojos));
 		return new ServiceListResponse(responsePojos);
 	}
