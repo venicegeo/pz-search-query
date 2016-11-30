@@ -47,6 +47,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import exception.PiazzaJobException;
 import model.data.DataResource;
+import model.logger.AuditElement;
 import model.logger.Severity;
 import model.response.DataResourceListResponse;
 import model.response.ServiceListResponse;
@@ -187,6 +188,7 @@ public class Controller {
 			SearchResponse response = client.prepareSearch(DATAINDEX).setTypes(DATATYPE).setFrom(page.intValue() * perPage.intValue())
 					.setSize(perPage.intValue()).addSort(sortBy, SortOrder.valueOf(order.toUpperCase())).setQuery(esDSL).get();
 			hits = response.getHits().getHits();
+			logger.log(String.format("Searching for list of dataResource objects matching criteria %s", esDSL), Severity.INFORMATIONAL, new AuditElement("searchquery", "searchListOfDataResourceObjects", ""));
 		} catch (Exception exception) {
 			String message = String.format(
 					"Error constructing SearchResponse, client.prepareSearch- page.intValue:%d,  perPage.intValue:%d,  sortBy:%s,  order:%s,  exception:%s, query DSL: %s",
@@ -249,6 +251,7 @@ public class Controller {
 			response = client.prepareSearch(SERVICESINDEX).setTypes(SERVICESTYPE).setFrom(page.intValue() * perPage.intValue())
 					.setSize(perPage.intValue()).addSort(sortBy, SortOrder.valueOf(order.toUpperCase())).setQuery(reconDSLstring).get();
 			hits = response.getHits().getHits();
+			logger.log(String.format("Searching for list of Service objects matching criteria %s", reconDSLstring), Severity.INFORMATIONAL, new AuditElement("searchquery", "searchListOfServiceObjects", ""));
 		} catch (Exception exception) {
 			String message = String.format("Error completing DSL to Elasticsearch from Services Search: %s", exception.getMessage());
 			LOGGER.error(message, exception);
