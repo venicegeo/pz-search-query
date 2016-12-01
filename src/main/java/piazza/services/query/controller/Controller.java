@@ -152,7 +152,7 @@ public class Controller {
 		try {
 			for (SearchHit hit : hits) {
 				// resultsList.add( hit.sourceAsString() ); // whole dataResource container
-				System.out.println(hit.sourceAsString() + "     whole source");
+				logger.log(String.format("%s whole source", hit.sourceAsString()), Severity.INFORMATIONAL);
 				DataResourceContainer drc = mapper.readValue(hit.sourceAsString(), DataResourceContainer.class);
 				DataResource dr = drc.dataResource;
 				resultsList.add(mapper.writeValueAsString(dr));
@@ -162,6 +162,7 @@ public class Controller {
 			String message = String.format("Error completing DSL to Elasticsearch: %s", exception.getMessage());
 			LOGGER.error(message, exception);
 			logger.log(message, Severity.ERROR);
+			logger.log(message, Severity.ERROR, new AuditElement("searchQuery", "search", "queryString"));
 			
 			throw new PiazzaJobException(message);
 		}
@@ -188,35 +189,30 @@ public class Controller {
 			SearchResponse response = client.prepareSearch(DATAINDEX).setTypes(DATATYPE).setFrom(page.intValue() * perPage.intValue())
 					.setSize(perPage.intValue()).addSort(sortBy, SortOrder.valueOf(order.toUpperCase())).setQuery(esDSL).get();
 			hits = response.getHits().getHits();
-			logger.log(String.format("Searching for list of dataResource objects matching criteria %s", esDSL), Severity.INFORMATIONAL, new AuditElement("searchquery", "searchListOfDataResourceObjects", ""));
+			logger.log(String.format("Searching for list of dataResource objects matching criteria %s", esDSL), Severity.INFORMATIONAL, new AuditElement("searchquery", "searchListOfDataResourceObjects", "query"));
 		} catch (Exception exception) {
 			String message = String.format(
 					"Error constructing SearchResponse, client.prepareSearch- page.intValue:%d,  perPage.intValue:%d,  sortBy:%s,  order:%s,  exception:%s, query DSL: %s",
 					page.intValue(), perPage.intValue(), sortBy, order, exception.getMessage(), esDSL);
 			LOGGER.error(message, exception);
 			logger.log(message, Severity.ERROR);
+			logger.log(message, Severity.ERROR, new AuditElement("searchQuery", "search", "queryString"));
 		}
 
 		// List<String> resultsList = new ArrayList<String>();
 		ObjectMapper mapper = new ObjectMapper();
 		List<DataResource> responsePojos = new ArrayList<DataResource>();
 		for (SearchHit hit : hits) {
-			// resultsList.add( hit.sourceAsString() ); // whole dataResource container
-			// System.out.println(hit.sourceAsString() + " whole source of hit");
-			// same?
-			// Map<String, Object> json = hit.getSource();
 			DataResourceContainer drc = mapper.readValue(hit.sourceAsString(), DataResourceContainer.class);
 			responsePojos.add(drc.dataResource);
-			// Hmmm, dataResource sub-items are added in reverse order of expected
-			// Oh well, for now; won't matter when serialized into Java object
-			// resultsList.add( json.get("dataResource").toString() );
 		}
-		System.out.println("\n\nResponse: " + mapper.writeValueAsString(responsePojos));
+
+		logger.log(String.format("\n\nResponse: %s", mapper.writeValueAsString(responsePojos)), Severity.INFORMATIONAL);
 		return new DataResourceListResponse(responsePojos);
 	}
 
-	/*
-	 * endpoint containing DSL string for service search
+	/**
+	 * Endpoint containing DSL string for service search
 	 * 
 	 * @input Elasticsearch DSL
 	 * 
@@ -236,12 +232,11 @@ public class Controller {
 		String reconDSLstring;
 		try {
 			reconDSLstring = mapper.writeValueAsString(esDSL);
-			// System.out.println("The Re-Constituted DSL query:");
-			// System.out.println( reconDSLstring );
 		} catch (Exception exception) {
 			String message = String.format("Error Reconstituting DSL from SearchQueryJob: %s", exception.getMessage());
 			LOGGER.error(message, exception);
 			logger.log(message, Severity.ERROR);
+			logger.log(message, Severity.ERROR, new AuditElement("searchQuery", "returnListOfServiceObjects", "queryString"));
 			throw new IOException(message);
 		}
 
@@ -256,23 +251,22 @@ public class Controller {
 			String message = String.format("Error completing DSL to Elasticsearch from Services Search: %s", exception.getMessage());
 			LOGGER.error(message, exception);
 			logger.log(message, Severity.ERROR);
+			logger.log(message, Severity.ERROR, new AuditElement("searchQuery", "returnListOfServiceObjects", "queryString"));
 			throw new IOException(message);
 		}
 		List<Service> responsePojos = new ArrayList<Service>();
 		for (SearchHit hit : hits) {
 			/*
-			 * Map<String, Object> json = hit.sourceAsMap(); System.out.println(json.get("dataResource").toString());
+			 * Map<String, Object> json = hit.sourceAsMap();
 			 * DataResource dr = mapper.readValue( json.get("dataResource").toString(), DataResource.class);
 			 * responsePojos.add( dr ); //resultsList.add( json.get("dataResource").toString() );
 			 */
 			// Map<String, Object> json = hit.sourceAsMap();
-			// System.out.println(json.get("dataResource").toString());
 			ServiceContainer sc = mapper.readValue(hit.sourceAsString(), ServiceContainer.class);
 			responsePojos.add(sc.service);
 			// resultsList.add( json.get("dataResource").toString() );
 		}
 		logger.log("\n\nResponse: " + mapper.writeValueAsString(responsePojos), Severity.INFORMATIONAL);
-		// System.out.println("\n\nResponse: " + mapper.writeValueAsString(responsePojos));
 		return new ServiceListResponse(responsePojos);
 	}
 
