@@ -19,7 +19,7 @@ import model.data.DataResource;
 import piazza.services.query.util.GeoJsonDeserializer;
 import piazza.services.query.util.GeoJsonSerializer;
 
-import org.elasticsearch.common.geo.GeoPoint;
+//import org.elasticsearch.common.geo.GeoPoint;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -36,8 +36,13 @@ import com.vividsolutions.jts.geom.Geometry;
 public class DataResourceContainer {
 //	@Id
 	public String dataResourceContainerId;
-	@JsonIgnoreProperties(value = { "geohash" })
-	public GeoPoint locationCenterPoint;
+	//@JsonIgnoreProperties(value = { "geohash" })
+	// public GeoPoint locationCenterPoint;
+	// 8/9/16 need representation of <lat>,<lon> for correct entry,
+	// without geohash, into Elasticsearch mapping of geo_point
+	// 1/12/17 ObjectMapper serializes into lat,lon AND geohash (added!)
+	// thus, GeoPoint in ES mapping, array representation in Java
+	public Double[] locationCenterPoint; // lon, lat  - note order!
 	// serialize into ES GeoShape
 	@JsonSerialize(using = GeoJsonSerializer.class)
 	@JsonDeserialize(using = GeoJsonDeserializer.class)
@@ -54,11 +59,11 @@ public class DataResourceContainer {
 		dataResourceContainerId = dataResource.getDataId();
 	}
 	
-	public GeoPoint getLocationCenterPoint() {
+	public Double[] getLocationCenterPoint() {
 		return locationCenterPoint;
 	}
-	public void setLocationCenterPoint(
-			GeoPoint gp ) {
+
+	public void setLocationCenterPoint(Double[] gp) {
 		this.locationCenterPoint = gp;
 	}
 	
