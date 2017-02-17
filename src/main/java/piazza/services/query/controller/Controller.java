@@ -57,7 +57,7 @@ import util.PiazzaLogger;
 @RestController
 public class Controller {
 
-	static final String DATAINDEX = "pzmetadata";
+	static final String DATAINDEX = "pzmetadataalias";
 	static final String DATATYPE = "DataResourceContainer";
 	static final String SERVICESINDEX = "pzservices";
 	static final String SERVICESTYPE = "ServiceContainer";
