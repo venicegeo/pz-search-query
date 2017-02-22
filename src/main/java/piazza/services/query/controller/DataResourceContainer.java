@@ -29,10 +29,10 @@ import com.vividsolutions.jts.geom.Geometry;
 /*
  * Shell containing object for DataResource annotated for ElasticSearch _mapping
  * @author C. Smith
- * @Document(indexName = "pzmetadata", type = "DataResource")
+ * @Document(indexName = "pzmetadataalias", type = "DataResource")
  */
 
-//@Document(indexName = "pzmetadata", type = "DataResourceContainer")
+//@Document(indexName = "pzmetadataalias", type = "DataResourceContainer")
 public class DataResourceContainer {
 //	@Id
 	public String dataResourceContainerId;

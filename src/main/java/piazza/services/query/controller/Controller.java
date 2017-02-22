@@ -26,25 +26,22 @@ import javax.servlet.http.HttpServletResponse;
 import org.elasticsearch.action.count.CountResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
-//import static org.elasticsearch.index.query.FilterBuilders.*;
-//import static org.elasticsearch.index.query.FilterBuilders.*;
 import org.elasticsearch.index.query.WrapperQueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import exception.PiazzaJobException;
 import model.data.DataResource;
 import model.logger.AuditElement;
@@ -57,7 +54,6 @@ import util.PiazzaLogger;
 @RestController
 public class Controller {
 
-	static final String DATAINDEX = "pzmetadataalias";
 	static final String DATATYPE = "DataResourceContainer";
 	static final String SERVICESINDEX = "pzservices";
 	static final String SERVICESTYPE = "ServiceContainer";
@@ -67,6 +63,9 @@ public class Controller {
 	static final String DEFAULT_SORTBY = "dataResource.metadata.createdOn";
 	static final String DEFAULT_SERVICE_SORTBY = "service.serviceId";
 	static final String DEFAULT_ORDER = "desc";
+
+	@Value("${elasticsearch.dataindexalias}")
+	private String dataIndexAlias;
 
 	@Autowired
 	private PiazzaLogger logger;
@@ -90,7 +89,7 @@ public class Controller {
 		/*
 		 * e.g. { "match_all" : { } } or { "match" : { "_all" : "kitten" } }
 		 */
-		CountResponse response = client.prepareCount(DATAINDEX).setQuery(qsqb).execute().actionGet();
+		CountResponse response = client.prepareCount(dataIndexAlias).setQuery(qsqb).execute().actionGet();
 		return response.getCount();
 	}
 
@@ -115,10 +114,10 @@ public class Controller {
 		SearchResponse response;
 		
 		if( sortBy != null)
-			response = client.prepareSearch(DATAINDEX).setTypes(DATATYPE).setFrom(page.intValue() * perPage.intValue())
+			response = client.prepareSearch(dataIndexAlias).setTypes(DATATYPE).setFrom(page.intValue() * perPage.intValue())
 			.setSize(perPage.intValue()).addSort(sortBy, SortOrder.valueOf(order.toUpperCase())).setQuery(esDSL).get();
 		else
-			response = client.prepareSearch(DATAINDEX).setTypes(DATATYPE).setFrom(page.intValue() * perPage.intValue())
+			response = client.prepareSearch(dataIndexAlias).setTypes(DATATYPE).setFrom(page.intValue() * perPage.intValue())
 				.setSize(perPage.intValue()).setQuery(esDSL).get();
 		
 		SearchHit[] hits = response.getHits().getHits();
@@ -141,10 +140,10 @@ public class Controller {
 		SearchResponse response;
 		
 		if( sortBy != null)
-			response = client.prepareSearch(DATAINDEX).setTypes(DATATYPE).setFrom(page.intValue() * perPage.intValue())
+			response = client.prepareSearch(dataIndexAlias).setTypes(DATATYPE).setFrom(page.intValue() * perPage.intValue())
 			.setSize(perPage.intValue()).addSort(sortBy, SortOrder.valueOf(order.toUpperCase())).setQuery(esDSL).get();
 		else
-			response = client.prepareSearch(DATAINDEX).setTypes(DATATYPE).setFrom(page.intValue() * perPage.intValue())
+			response = client.prepareSearch(dataIndexAlias).setTypes(DATATYPE).setFrom(page.intValue() * perPage.intValue())
 				.setSize(perPage.intValue()).setQuery(esDSL).get();
 		SearchHit[] hits = response.getHits().getHits();
 		ObjectMapper mapper = new ObjectMapper();
@@ -186,7 +185,7 @@ public class Controller {
 
 		SearchHit[] hits = null;
 		try {
-			SearchResponse response = client.prepareSearch(DATAINDEX).setTypes(DATATYPE).setFrom(page.intValue() * perPage.intValue())
+			SearchResponse response = client.prepareSearch(dataIndexAlias).setTypes(DATATYPE).setFrom(page.intValue() * perPage.intValue())
 					.setSize(perPage.intValue()).addSort(sortBy, SortOrder.valueOf(order.toUpperCase())).setQuery(esDSL).get();
 			hits = response.getHits().getHits();
 			logger.log(String.format("Searching for list of dataResource objects matching criteria %s", esDSL), Severity.INFORMATIONAL, new AuditElement("searchquery", "searchListOfDataResourceObjects", "query"));
