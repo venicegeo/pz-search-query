@@ -2,7 +2,7 @@
 Service to accept queries to Piazza Elasticsearch instance for content discovery
 endpoints accept POST of Elasticsearch query language (DSL):
 http://pz-search-query/api/v1/data -  returns "dataId" from matching records
-http://pz-search-query/api/v1/dslfordataresources -  returns full pzmetadata content from matching records as 
+http://pz-search-query/api/v1/dslfordataresources -  returns full pzmetadataalias content from matching records as 
 list of DataResource objects, presented in Postman as nicely formatted each being a JSON documents.
 
 http://pz-search-query/api/v1/recordcount -  returns count as number of records matching the input
