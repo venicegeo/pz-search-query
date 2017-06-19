@@ -191,8 +191,8 @@ public class Controller {
 			logger.log(String.format("Searching for list of dataResource objects matching criteria %s", esDSL), Severity.INFORMATIONAL, new AuditElement("searchquery", "searchListOfDataResourceObjects", "query"));
 		} catch (Exception exception) {
 			String message = String.format(
-					"Error constructing SearchResponse, client.prepareSearch- page.intValue:%d,  perPage.intValue:%d,  sortBy:%s,  order:%s,  exception:%s, query DSL: %s",
-					page.intValue(), perPage.intValue(), sortBy, order, exception.getMessage(), esDSL);
+					"Error constructing SearchResponse, client.prepareSearch- page:%d,  perPage:%d,  sortBy:%s,  order:%s,  exception:%s, query DSL: %s",
+					page, perPage, sortBy, order, exception.getMessage(), esDSL);
 			LOGGER.error(message, exception);
 			logger.log(message, Severity.ERROR);
 			logger.log(message, Severity.ERROR, new AuditElement("searchQuery", "search", "queryString"));
@@ -206,7 +206,7 @@ public class Controller {
 			responsePojos.add(drc.dataResource);
 		}
 
-		logger.log(String.format("\n\nResponse: %s", mapper.writeValueAsString(responsePojos)), Severity.INFORMATIONAL);
+		logger.log(String.format("%n%nResponse: %s", mapper.writeValueAsString(responsePojos)), Severity.INFORMATIONAL);
 		return new DataResourceListResponse(responsePojos);
 	}
 
