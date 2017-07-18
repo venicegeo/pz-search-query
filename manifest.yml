@@ -1,7 +1,0 @@
-applications:
-- name: pz-search-query
-  host: pz-search-query
-  memory: 512M
-  instances: 1
-  timeout: 80
-  path: pz-search-query.jar
