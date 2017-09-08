@@ -145,7 +145,7 @@ node {
         for (Object legacyApp : legacyAppNames.trim().tokenize(',')) {
           def legacyAppName = legacyApp.toString().trim()
           if (legacyAppName != appName) {
-            sh "cf unmap-route ${legacyAppName} ${env.PHASE_ONE_PCF_DOMAIN} --hostname ${legacyAppName}"
+            sh "cf unmap-route ${legacyAppName} ${env.PHASE_ONE_PCF_DOMAIN} --hostname pz-search-query"
             sh "cf delete -f ${legacyAppName} -r"
           }
         }
@@ -218,7 +218,7 @@ node {
           for (Object legacyApp : legacyAppNames.trim().tokenize(',')) {
             def legacyAppName = legacyApp.toString().trim()
             if (legacyAppName != appName) {
-              sh "cf unmap-route ${legacyAppName} ${env.PHASE_TWO_PCF_DOMAIN} --hostname ${legacyAppName}"
+              sh "cf unmap-route ${legacyAppName} ${env.PHASE_TWO_PCF_DOMAIN} --hostname pz-search-query"
               sh "cf delete -f ${legacyAppName} -r"
             }
           }
