@@ -48,11 +48,11 @@ public class ContainerTests {
 
 		// Verify
 		Assert.assertTrue(serviceContainer != null);
-		Assert.assertTrue(serviceContainer.serviceContainerId.equals("test-container"));
-		Assert.assertTrue(serviceContainer.service.getServiceId().equals("test-service-id"));
-		Assert.assertTrue(serviceContainer.service.getMethod().equals("GET"));
-		Assert.assertTrue(serviceContainer.service.getResourceMetadata().getName().equals("Testing"));
-		Assert.assertTrue(serviceContainer.service.getUrl().equals("http://test.com"));
+		Assert.assertTrue(serviceContainer.getServiceContainerId().equals("test-container"));
+		Assert.assertTrue(serviceContainer.getService().getServiceId().equals("test-service-id"));
+		Assert.assertTrue(serviceContainer.getService().getMethod().equals("GET"));
+		Assert.assertTrue(serviceContainer.getService().getResourceMetadata().getName().equals("Testing"));
+		Assert.assertTrue(serviceContainer.getService().getUrl().equals("http://test.com"));
 
 		// Serialize back to String. Ensure no exceptions.
 		String serialized = mapper.writeValueAsString(serviceContainer);
@@ -102,11 +102,11 @@ public class ContainerTests {
 
 		// Verify
 		Assert.assertTrue(dataContainer != null);
-		Assert.assertTrue(dataContainer.dataResourceContainerId.equals("container-id"));
-		Assert.assertTrue(dataContainer.dataResource.getDataId().equals("test-data-id"));
-		Assert.assertTrue(dataContainer.dataResource.getDataType() instanceof RasterDataType);
-		Assert.assertTrue(dataContainer.dataResource.getSpatialMetadata().getCoordinateReferenceSystem().equals("CRS"));
-		Assert.assertTrue(dataContainer.dataResource.getMetadata().getName().equals("elevation"));
+		Assert.assertTrue(dataContainer.getDataResourceContainerId().equals("container-id"));
+		Assert.assertTrue(dataContainer.getDataResource().getDataId().equals("test-data-id"));
+		Assert.assertTrue(dataContainer.getDataResource().getDataType() instanceof RasterDataType);
+		Assert.assertTrue(dataContainer.getDataResource().getSpatialMetadata().getCoordinateReferenceSystem().equals("CRS"));
+		Assert.assertTrue(dataContainer.getDataResource().getMetadata().getName().equals("elevation"));
 
 		// Serialize back out
 		String serialized = mapper.writeValueAsString(dataContainer);

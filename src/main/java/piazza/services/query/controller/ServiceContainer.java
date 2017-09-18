@@ -25,10 +25,10 @@ import model.service.metadata.Service;
 //@Document(indexName = "pzservices", type = "ServiceContainer")
 public class ServiceContainer {
 //	@Id
-	public String serviceContainerId;
+	private String serviceContainerId;
 	
 //	@Field(type = FieldType.Nested)
-	public Service service;
+	private Service service;
 
 	public ServiceContainer() {
 		// Empty constructor required by Jackson
@@ -38,6 +38,22 @@ public class ServiceContainer {
 	{
 		service = s;
 		serviceContainerId = service.getServiceId();
+	}
+
+	public Service getService() {
+		return service;
+	}
+
+	public void setService(Service service) {
+		this.service = service;
+	}
+
+	public String getServiceContainerId() {
+		return serviceContainerId;
+	}
+
+	public void setServiceContainerId(String serviceContainerId) {
+		this.serviceContainerId = serviceContainerId;
 	}
 
 }

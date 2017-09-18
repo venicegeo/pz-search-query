@@ -156,7 +156,7 @@ public class Controller {
 				// resultsList.add( hit.sourceAsString() ); // whole dataResource container
 				logger.log(String.format("%s whole source", hit.sourceAsString()), Severity.INFORMATIONAL);
 				DataResourceContainer drc = mapper.readValue(hit.sourceAsString(), DataResourceContainer.class);
-				DataResource dr = drc.dataResource;
+				DataResource dr = drc.getDataResource();
 				resultsList.add(mapper.writeValueAsString(dr));
 			}
 			return resultsList;
@@ -203,7 +203,7 @@ public class Controller {
 		List<DataResource> responsePojos = new ArrayList<DataResource>();
 		for (SearchHit hit : hits) {
 			DataResourceContainer drc = mapper.readValue(hit.sourceAsString(), DataResourceContainer.class);
-			responsePojos.add(drc.dataResource);
+			responsePojos.add(drc.getDataResource());
 		}
 
 		logger.log(String.format("%n%nResponse: %s", mapper.writeValueAsString(responsePojos)), Severity.INFORMATIONAL);
@@ -255,7 +255,7 @@ public class Controller {
 		List<Service> responsePojos = new ArrayList<Service>();
 		for (SearchHit hit : hits) {
 			ServiceContainer sc = mapper.readValue(hit.sourceAsString(), ServiceContainer.class);
-			responsePojos.add(sc.service);
+			responsePojos.add(sc.getService());
 		}
 		logger.log("\n\nResponse: " + mapper.writeValueAsString(responsePojos), Severity.INFORMATIONAL);
 		return new ServiceListResponse(responsePojos);
