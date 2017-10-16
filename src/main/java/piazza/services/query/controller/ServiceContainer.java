@@ -17,28 +17,43 @@ package piazza.services.query.controller;
 
 import model.service.metadata.Service;
 
-//import org.elasticsearch.common.geo.GeoPoint;
-
-/*
+/**
  * Shell containing object for DataResource annotated for ElasticSearch _mapping
  * @author C. Smith
  * @Document(indexName = "pzmetadataalias", type = "DataResource")
  */
-
 //@Document(indexName = "pzservices", type = "ServiceContainer")
 public class ServiceContainer {
 //	@Id
-	public String serviceContainerId;
+	private String serviceContainerId;
 	
 //	@Field(type = FieldType.Nested)
-	public Service service;
+	private Service service;
 
-	public ServiceContainer( ) { }
+	public ServiceContainer() {
+		// Empty constructor required by Jackson
+	}
 	
 	public ServiceContainer( Service s )
 	{
 		service = s;
 		serviceContainerId = service.getServiceId();
+	}
+
+	public Service getService() {
+		return service;
+	}
+
+	public void setService(Service service) {
+		this.service = service;
+	}
+
+	public String getServiceContainerId() {
+		return serviceContainerId;
+	}
+
+	public void setServiceContainerId(String serviceContainerId) {
+		this.serviceContainerId = serviceContainerId;
 	}
 
 }

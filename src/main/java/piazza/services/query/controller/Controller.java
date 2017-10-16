@@ -54,16 +54,17 @@ import util.PiazzaLogger;
 @RestController
 public class Controller {
 
-	static final String DATATYPE = "DataResourceContainer";
-	static final String SERVICESINDEX = "pzservices";
-	static final String SERVICESTYPE = "ServiceContainer";
-	static final int maxreturncount = 1000;
-	static final String DEFAULT_PAGE_SIZE = "10";
-	static final String DEFAULT_PAGE = "0";
-	static final String DEFAULT_SORTBY = "dataResource.metadata.createdOn";
-	static final String DEFAULT_SERVICE_SORTBY = "service.resourceMetadata.createdOn";
-	static final String DEFAULT_ORDER = "desc";
-
+	private static final String DATATYPE = "DataResourceContainer";
+	private static final String SERVICESINDEX = "pzservices";
+	private static final String SERVICESTYPE = "ServiceContainer";
+	private static final String DEFAULT_PAGE_SIZE = "10";
+	private static final String DEFAULT_PAGE = "0";
+	private static final String DEFAULT_SORTBY = "dataResource.metadata.createdOn";
+	private static final String DEFAULT_SERVICE_SORTBY = "service.resourceMetadata.createdOn";
+	private static final String DEFAULT_ORDER = "desc";
+	private static final String SEARCH_QUERY = "searchQuery";
+	private static final String QUERY_STRING = "queryString";
+	
 	@Value("${elasticsearch.dataindexalias}")
 	private String dataIndexAlias;
 
@@ -73,7 +74,7 @@ public class Controller {
 	@Autowired
 	private Client client;
 
-	private final static Logger LOGGER = LoggerFactory.getLogger(Controller.class);
+	private static final Logger LOG = LoggerFactory.getLogger(Controller.class);
 
 	@RequestMapping("/")
 	@ResponseBody
@@ -81,12 +82,17 @@ public class Controller {
 		return "Hello Piazza Search Query! DSL-input endpoint at /api/v1/datafull";
 	}
 
-	@SuppressWarnings("unchecked")
+	/**
+	 * Example:
+	 * {@code
+	 * 	{ "match_all" : { } } or { "match" : { "_all" : "kitten" } }
+	 * }
+	 */
+	@SuppressWarnings("deprecation")
 	@RequestMapping(value = API_ROOT + "/recordcount", method = RequestMethod.POST, consumes = "application/json")
 	public Long getRecordCount(@RequestBody(required = true) String esDSL) {
-		/*
-		 * e.g. { "match_all" : { } } or { "match" : { "_all" : "kitten" } }
-		 */
+		WrapperQueryBuilder qsqb = new WrapperQueryBuilder(esDSL);
+		
 		WrapperQueryBuilder qsqb = new WrapperQueryBuilder(esDSL);
 		SearchResponse response = client.prepareSearch(dataIndexAlias).setSource(new SearchSourceBuilder().size(0).query(qsqb)).get();
 		return response.getHits().getTotalHits();
@@ -133,7 +139,6 @@ public class Controller {
 		return resultsList;
 	}
 
-	@SuppressWarnings("unchecked")
 	@RequestMapping(value = API_ROOT + "/datafull", method = RequestMethod.POST, consumes = "application/json")
 	public List<String> getMetadataFull(@RequestBody(required = true) String esDSL,
 			@RequestParam(value = "page", required = false, defaultValue = DEFAULT_PAGE) Integer page,
@@ -160,29 +165,27 @@ public class Controller {
 				logger.log(String.format("%s whole source", hit.sourceAsString()), Severity.INFORMATIONAL);
 				
 				DataResourceContainer drc = mapper.readValue(hit.sourceAsString(), DataResourceContainer.class);
-				DataResource dr = drc.dataResource;
+				DataResource dr = drc.getDataResource();
 				resultsList.add(mapper.writeValueAsString(dr));
 			}
 			return resultsList;
 		} catch (Exception exception) {
 			String message = String.format("Error completing DSL to Elasticsearch: %s", exception.getMessage());
-			LOGGER.error(message, exception);
+			LOG.error(message, exception);
 			logger.log(message, Severity.ERROR);
-			logger.log(message, Severity.ERROR, new AuditElement("searchQuery", "search", "queryString"));
+			logger.log(message, Severity.ERROR, new AuditElement(SEARCH_QUERY, "search", QUERY_STRING));
 			
 			throw new PiazzaJobException(message);
 		}
 	}
 
-	/*
+	/**
 	 * endpoint ingesting DSL string
 	 * 
 	 * @input Elasticsearch DSL
 	 * 
 	 * @return list of dataResource objects matching criteria nice JSON formatting for Postman!
 	 */
-
-	@SuppressWarnings("unchecked")
 	@RequestMapping(value = API_ROOT + "/dslfordataresources", method = RequestMethod.POST, consumes = "application/json")
 	public DataResourceListResponse getDSLtoDRs(@RequestBody(required = true) String esDSL,
 			@RequestParam(value = "page", required = false, defaultValue = DEFAULT_PAGE) Integer page,
@@ -200,22 +203,21 @@ public class Controller {
 					new AuditElement("searchquery", "searchListOfDataResourceObjects", "query"));
 		} catch (Exception exception) {
 			String message = String.format(
-					"Error constructing SearchResponse, client.prepareSearch- page.intValue:%d,  perPage.intValue:%d,  sortBy:%s,  order:%s,  exception:%s, query DSL: %s",
-					page.intValue(), perPage.intValue(), sortBy, order, exception.getMessage(), esDSL);
-			LOGGER.error(message, exception);
+					"Error constructing SearchResponse, client.prepareSearch- page:%d,  perPage:%d,  sortBy:%s,  order:%s,  exception:%s, query DSL: %s",
+					page, perPage, sortBy, order, exception.getMessage(), esDSL);
+			LOG.error(message, exception);
 			logger.log(message, Severity.ERROR);
-			logger.log(message, Severity.ERROR, new AuditElement("searchQuery", "search", "queryString"));
+			logger.log(message, Severity.ERROR, new AuditElement(SEARCH_QUERY, "search", QUERY_STRING));
 		}
 
-		// List<String> resultsList = new ArrayList<String>();
 		ObjectMapper mapper = new ObjectMapper();
 		List<DataResource> responsePojos = new ArrayList<DataResource>();
 		for (SearchHit hit : hits) {
 			DataResourceContainer drc = mapper.readValue(hit.sourceAsString(), DataResourceContainer.class);
-			responsePojos.add(drc.dataResource);
+			responsePojos.add(drc.getDataResource());
 		}
 
-		logger.log(String.format("\n\nResponse: %s", mapper.writeValueAsString(responsePojos)), Severity.INFORMATIONAL);
+		logger.log(String.format("%n%nResponse: %s", mapper.writeValueAsString(responsePojos)), Severity.INFORMATIONAL);
 		return new DataResourceListResponse(responsePojos);
 	}
 
@@ -226,7 +228,6 @@ public class Controller {
 	 * 
 	 * @return list of Service objects matching criteria
 	 */
-	@SuppressWarnings("unchecked")
 	@RequestMapping(value = API_ROOT + "/dslservices", method = RequestMethod.POST, consumes = "application/json")
 	public ServiceListResponse getServices(@RequestBody(required = true) Object esDSL,
 			@RequestParam(value = "page", required = false, defaultValue = DEFAULT_PAGE) Integer page,
@@ -242,9 +243,9 @@ public class Controller {
 			reconDSLstring = mapper.writeValueAsString(esDSL);
 		} catch (Exception exception) {
 			String message = String.format("Error Reconstituting DSL from SearchQueryJob: %s", exception.getMessage());
-			LOGGER.error(message, exception);
+			LOG.error(message, exception);
 			logger.log(message, Severity.ERROR);
-			logger.log(message, Severity.ERROR, new AuditElement("searchQuery", "returnListOfServiceObjects", "queryString"));
+			logger.log(message, Severity.ERROR, new AuditElement(SEARCH_QUERY, "returnListOfServiceObjects", QUERY_STRING));
 			throw new IOException(message);
 		}
 
@@ -259,22 +260,15 @@ public class Controller {
 			logger.log(String.format("Searching for list of Service objects matching criteria %s", reconDSLstring), Severity.INFORMATIONAL, new AuditElement("searchquery", "searchListOfServiceObjects", ""));
 		} catch (Exception exception) {
 			String message = String.format("Error completing DSL to Elasticsearch from Services Search: %s", exception.getMessage());
-			LOGGER.error(message, exception);
+			LOG.error(message, exception);
 			logger.log(message, Severity.ERROR);
-			logger.log(message, Severity.ERROR, new AuditElement("searchQuery", "returnListOfServiceObjects", "queryString"));
+			logger.log(message, Severity.ERROR, new AuditElement(SEARCH_QUERY, "returnListOfServiceObjects", QUERY_STRING));
 			throw new IOException(message);
 		}
 		List<Service> responsePojos = new ArrayList<Service>();
 		for (SearchHit hit : hits) {
-			/*
-			 * Map<String, Object> json = hit.sourceAsMap();
-			 * DataResource dr = mapper.readValue( json.get("dataResource").toString(), DataResource.class);
-			 * responsePojos.add( dr ); //resultsList.add( json.get("dataResource").toString() );
-			 */
-			// Map<String, Object> json = hit.sourceAsMap();
 			ServiceContainer sc = mapper.readValue(hit.sourceAsString(), ServiceContainer.class);
-			responsePojos.add(sc.service);
-			// resultsList.add( json.get("dataResource").toString() );
+			responsePojos.add(sc.getService());
 		}
 		logger.log("\n\nResponse: " + mapper.writeValueAsString(responsePojos), Severity.INFORMATIONAL);
 		return new ServiceListResponse(responsePojos);

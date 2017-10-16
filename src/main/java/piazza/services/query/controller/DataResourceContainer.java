@@ -19,9 +19,6 @@ import model.data.DataResource;
 import piazza.services.query.util.GeoJsonDeserializer;
 import piazza.services.query.util.GeoJsonSerializer;
 
-//import org.elasticsearch.common.geo.GeoPoint;
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.vividsolutions.jts.geom.Geometry;
@@ -35,23 +32,25 @@ import com.vividsolutions.jts.geom.Geometry;
 //@Document(indexName = "pzmetadataalias", type = "DataResourceContainer")
 public class DataResourceContainer {
 //	@Id
-	public String dataResourceContainerId;
-	//@JsonIgnoreProperties(value = { "geohash" })
-	// public GeoPoint locationCenterPoint;
+	private String dataResourceContainerId;
+	
 	// 8/9/16 need representation of <lat>,<lon> for correct entry,
 	// without geohash, into Elasticsearch mapping of geo_point
 	// 1/12/17 ObjectMapper serializes into lat,lon AND geohash (added!)
 	// thus, GeoPoint in ES mapping, array representation in Java
-	public Double[] locationCenterPoint; // lon, lat  - note order!
+	private Double[] locationCenterPoint; // lon, lat  - note order!
+	
 	// serialize into ES GeoShape
 	@JsonSerialize(using = GeoJsonSerializer.class)
 	@JsonDeserialize(using = GeoJsonDeserializer.class)
-	public Geometry boundingArea = null;
+	private Geometry boundingArea = null;
 	
 //	@Field(type = FieldType.Nested)
-	public DataResource dataResource;
+	private DataResource dataResource;
 
-	public DataResourceContainer( ) { }
+	public DataResourceContainer() {
+		// Empty constructor required by Jackson
+	}
 	
 	public DataResourceContainer( DataResource dr )
 	{
@@ -73,6 +72,22 @@ public class DataResourceContainer {
 	public void setBoundingArea(
 		Geometry boundingArea ) {
 		this.boundingArea = boundingArea;
+	}
+
+	public DataResource getDataResource() {
+		return dataResource;
+	}
+
+	public void setDataResource(DataResource dataResource) {
+		this.dataResource = dataResource;
+	}
+
+	public String getDataResourceContainerId() {
+		return dataResourceContainerId;
+	}
+
+	public void setDataResourceContainerId(String dataResourceContainerId) {
+		this.dataResourceContainerId = dataResourceContainerId;
 	}
 
 }
