@@ -92,8 +92,6 @@ public class Controller {
 	@RequestMapping(value = API_ROOT + "/recordcount", method = RequestMethod.POST, consumes = "application/json")
 	public Long getRecordCount(@RequestBody(required = true) String esDSL) {
 		WrapperQueryBuilder qsqb = new WrapperQueryBuilder(esDSL);
-		
-		WrapperQueryBuilder qsqb = new WrapperQueryBuilder(esDSL);
 		SearchResponse response = client.prepareSearch(dataIndexAlias).setSource(new SearchSourceBuilder().size(0).query(qsqb)).get();
 		return response.getHits().getTotalHits();
 	}
