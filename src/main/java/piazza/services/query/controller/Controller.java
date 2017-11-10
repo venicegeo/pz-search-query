@@ -23,11 +23,11 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.elasticsearch.action.count.CountResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.index.query.WrapperQueryBuilder;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,9 +92,8 @@ public class Controller {
 	@RequestMapping(value = API_ROOT + "/recordcount", method = RequestMethod.POST, consumes = "application/json")
 	public Long getRecordCount(@RequestBody(required = true) String esDSL) {
 		WrapperQueryBuilder qsqb = new WrapperQueryBuilder(esDSL);
-		
-		CountResponse response = client.prepareCount(dataIndexAlias).setQuery(qsqb).execute().actionGet();
-		return response.getCount();
+		SearchResponse response = client.prepareSearch(dataIndexAlias).setSource(new SearchSourceBuilder().size(0).query(qsqb)).get();
+		return response.getHits().getTotalHits();
 	}
 
 	/**
@@ -116,13 +115,18 @@ public class Controller {
 			@RequestParam(value = "sortBy", required = false ) String sortBy) {
 
 		SearchResponse response;
-		
+
+		WrapperQueryBuilder query = new WrapperQueryBuilder(esDSL);
 		if( sortBy != null)
+		{
 			response = client.prepareSearch(dataIndexAlias).setTypes(DATATYPE).setFrom(page.intValue() * perPage.intValue())
-			.setSize(perPage.intValue()).addSort(sortBy, SortOrder.valueOf(order.toUpperCase())).setQuery(esDSL).get();
+			.setSize(perPage.intValue()).addSort(sortBy, SortOrder.valueOf(order.toUpperCase())).setQuery(query).get();
+		}
 		else
+		{
 			response = client.prepareSearch(dataIndexAlias).setTypes(DATATYPE).setFrom(page.intValue() * perPage.intValue())
-				.setSize(perPage.intValue()).setQuery(esDSL).get();
+				.setSize(perPage.intValue()).setQuery(query).get();
+		}
 		
 		SearchHit[] hits = response.getHits().getHits();
 		List<String> resultsList = new ArrayList<String>();
@@ -142,12 +146,14 @@ public class Controller {
 
 		SearchResponse response;
 		
+		WrapperQueryBuilder query = new WrapperQueryBuilder(esDSL);
 		if( sortBy != null)
 			response = client.prepareSearch(dataIndexAlias).setTypes(DATATYPE).setFrom(page.intValue() * perPage.intValue())
-			.setSize(perPage.intValue()).addSort(sortBy, SortOrder.valueOf(order.toUpperCase())).setQuery(esDSL).get();
+			.setSize(perPage.intValue()).addSort(sortBy, SortOrder.valueOf(order.toUpperCase())).setQuery(query).get();
 		else
 			response = client.prepareSearch(dataIndexAlias).setTypes(DATATYPE).setFrom(page.intValue() * perPage.intValue())
-				.setSize(perPage.intValue()).setQuery(esDSL).get();
+				.setSize(perPage.intValue()).setQuery(query).get();
+		
 		SearchHit[] hits = response.getHits().getHits();
 		ObjectMapper mapper = new ObjectMapper();
 		List<String> resultsList = new ArrayList<String>();
@@ -155,6 +161,7 @@ public class Controller {
 			for (SearchHit hit : hits) {
 				// resultsList.add( hit.sourceAsString() ); // whole dataResource container
 				logger.log(String.format("%s whole source", hit.sourceAsString()), Severity.INFORMATIONAL);
+				
 				DataResourceContainer drc = mapper.readValue(hit.sourceAsString(), DataResourceContainer.class);
 				DataResource dr = drc.getDataResource();
 				resultsList.add(mapper.writeValueAsString(dr));
@@ -186,10 +193,12 @@ public class Controller {
 
 		SearchHit[] hits = null;
 		try {
+			WrapperQueryBuilder query = new WrapperQueryBuilder(esDSL);
 			SearchResponse response = client.prepareSearch(dataIndexAlias).setTypes(DATATYPE).setFrom(page.intValue() * perPage.intValue())
-					.setSize(perPage.intValue()).addSort(sortBy, SortOrder.valueOf(order.toUpperCase())).setQuery(esDSL).get();
+					.setSize(perPage.intValue()).addSort(sortBy, SortOrder.valueOf(order.toUpperCase())).setQuery(query).get();
 			hits = response.getHits().getHits();
-			logger.log(String.format("Searching for list of dataResource objects matching criteria %s", esDSL), Severity.INFORMATIONAL, new AuditElement("searchquery", "searchListOfDataResourceObjects", "query"));
+			logger.log(String.format("Searching for list of dataResource objects matching criteria %s", esDSL), Severity.INFORMATIONAL,
+					new AuditElement("searchquery", "searchListOfDataResourceObjects", "query"));
 		} catch (Exception exception) {
 			String message = String.format(
 					"Error constructing SearchResponse, client.prepareSearch- page:%d,  perPage:%d,  sortBy:%s,  order:%s,  exception:%s, query DSL: %s",
@@ -241,8 +250,10 @@ public class Controller {
 		SearchResponse response;
 		SearchHit[] hits;
 		try {
+
+			WrapperQueryBuilder query = new WrapperQueryBuilder(reconDSLstring);
 			response = client.prepareSearch(SERVICESINDEX).setTypes(SERVICESTYPE).setFrom(page.intValue() * perPage.intValue())
-					.setSize(perPage.intValue()).addSort(sortBy, SortOrder.valueOf(order.toUpperCase())).setQuery(reconDSLstring).get();
+					.setSize(perPage.intValue()).addSort(sortBy, SortOrder.valueOf(order.toUpperCase())).setQuery(query).get();
 			hits = response.getHits().getHits();
 			logger.log(String.format("Searching for list of Service objects matching criteria %s", reconDSLstring), Severity.INFORMATIONAL, new AuditElement("searchquery", "searchListOfServiceObjects", ""));
 		} catch (Exception exception) {
