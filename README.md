@@ -20,4 +20,3 @@ query string (just the query portion of, e.g., full DSL JSON)
 For Piazza usage through Gateway-
 Please reference Wiki page at:
 https://github.com/venicegeo/venice/wiki/Pz-Search-Services
-
