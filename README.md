@@ -6,14 +6,15 @@ The pz-search-query is a service to accept queries to Piazza Elasticsearch insta
 | http://pz-search-query/api/v1/data                | POST | returns "dataId" from matching records  |
 | http://pz-search-query/api/v1/dslfordataresources | POST | returns full pzmetadataalias content from matching records as list of DataResource objects, presented in Postman as nicely formatted each being a JSON documents. |
 | http://pz-search-query/api/v1/recordcount         | POST | returns count as number of records matching the input
-query string (just the query portion of, e.g., full DSL JSON) <br/> 
+query string (just the query portion of, e.g., full DSL JSON), example below. | 
+
 ```
 {
      "match" : {
          "_all" : "kitten"
      }
 }
-``` |
+```
 
 ***
 ## Requirements
